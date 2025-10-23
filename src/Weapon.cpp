@@ -4,6 +4,7 @@
 #include "Components/CollisionComponent.h"
 #include "Components/AnimationComponent.h"
 #include "Components/WeaponComponent.h"
+#include "Components/KinematicsComponent.h"
 
 Weapon::Weapon(EntityType type)
     : m_type(type)
@@ -21,6 +22,8 @@ void Weapon::initComponents()
         addComponent<CollisionComponent>(*collision);
     if (auto *weapon = entityData.getComponent<WeaponComponent>())
         addComponent<WeaponComponent>(*weapon);
+    if (auto *kinematics = entityData.getComponent<KinematicsComponent>())
+        addComponent<KinematicsComponent>(*kinematics);
     if (auto *animData = entityData.getComponent<AnimationData>()) {
         auto &animComponent = addComponent<AnimationComponent>(*getComponent<VisualComponent>());
         // Load animations from animation data
@@ -33,14 +36,23 @@ void Weapon::update(float dt, sf::Vector2f playerPos)
 {
     if (auto weapon = getComponent<WeaponComponent>()) {
         weapon->update(dt);
-        if (auto visual = getComponent<VisualComponent>()) {
-            visual->update(dt);
-            visual->setPosition(playerPos);
-            // Rotation will be handled by KinematicsComponent later
-        }
-        if (auto collision = getComponent<CollisionComponent>()) {
-            collision->setPosition(playerPos);
-        }
+    }
+
+    auto *visual = getComponent<VisualComponent>();
+    auto *collision = getComponent<CollisionComponent>();
+    auto *kinematics = getComponent<KinematicsComponent>();
+
+    if (kinematics && visual && collision) {
+        // Set position to player/tower position first
+        visual->setPosition(playerPos);
+        // KinematicsComponent handles rotation and other transforms
+        kinematics->update(dt, *visual, *collision);
+    }
+    else if (visual && collision) {
+        // Fallback for weapons without kinematics
+        visual->update(dt);
+        visual->setPosition(playerPos);
+        collision->setPosition(playerPos);
     }
 }
 
@@ -51,14 +63,3 @@ void Weapon::draw(sf::RenderTarget &target, sf::RenderStates states) const
     if (auto collision = getComponent<CollisionComponent>())
         collision->draw(target, states);
 }
-
-// void Weapon::addDamage(float amount)
-// {
-//     if (auto weapon = getComponent<WeaponComponent>())
-//         weapon->addDamage(amount);
-// }
-// void Weapon::addPiercing()
-// {
-//     if (auto weapon = getComponent<WeaponComponent>())
-//         weapon->addPiercing();
-// }

@@ -90,8 +90,8 @@ namespace Config {
                            .setRadius(16.f)
                            .build())
             .setKinematics(KinematicsDataBuilder()
-                               .setAngularVelocity(10.f)
-                               .setBehavior(KinematicsBehavior::Orbital)
+                               .setAngularVelocity(90.f)
+                               .setBehavior(KinematicsBehavior::Sweeping)
                                .build())
             .build();
 

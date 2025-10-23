@@ -4,6 +4,7 @@
 #include "../Components/CollisionComponent.h"
 #include "../Components/AnimationComponent.h"
 #include "../Components/WeaponComponent.h"
+#include "../Components/KinematicsComponent.h"
 
 void EntityManager::loadEntityData()
 {
@@ -16,6 +17,9 @@ void EntityManager::loadEntityData()
 
         if (config.weapon.has_value())
             entity.addComponent<WeaponComponent>(config.weapon.value());
+
+        if (config.kinematics.has_value())
+            entity.addComponent<KinematicsComponent>(config.kinematics.value());
     }
 }
 
