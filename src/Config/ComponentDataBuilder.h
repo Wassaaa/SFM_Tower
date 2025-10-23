@@ -145,66 +145,89 @@ public:
         m_baseDamage = damage;
         return *this;
     }
-    WeaponDataBuilder &setBaseSpeed(float speed)
+    WeaponDataBuilder &setBasePiercing(float piercing)
     {
-        m_baseSpeed = speed;
+        m_basePiercing = piercing;
         return *this;
     }
-    WeaponDataBuilder &setSpeedInterval(float interval)
+    WeaponDataBuilder &setMaxHits(int hits)
     {
-        m_speedInterval = interval;
+        m_maxHits = hits;
         return *this;
     }
-    WeaponDataBuilder &setBaseRange(float range)
+    WeaponDataBuilder &setLifetime(float lifetime)
     {
-        m_baseRange = range;
+        m_lifetime = lifetime;
         return *this;
     }
-    WeaponDataBuilder &setRangeInterval(const sf::Vector2f &interval)
+    WeaponDataBuilder &setRadius(float radius)
     {
-        m_rangeInterval = interval;
-        return *this;
-    }
-    WeaponDataBuilder &setBaseRadius(float radius)
-    {
-        m_baseRadius = radius;
-        return *this;
-    }
-    WeaponDataBuilder &setCritChance(float chance)
-    {
-        m_baseCritChance = chance;
-        return *this;
-    }
-    WeaponDataBuilder &setCritDamage(float damage)
-    {
-        m_baseCritDamage = damage;
-        return *this;
-    }
-    WeaponDataBuilder &setBaseCD(float cd)
-    {
-        m_baseCD = cd;
-        return *this;
-    }
-    WeaponDataBuilder &setBaseDuration(float duration)
-    {
-        m_baseDuration = duration;
+        m_radius = radius;
         return *this;
     }
     WeaponComponentData build() const
     {
-        return {m_baseDamage, m_baseSpeed,      m_speedInterval,  m_baseRange, m_rangeInterval,
-                m_baseRadius, m_baseCritChance, m_baseCritDamage, m_baseCD,    m_baseDuration};
+        return {m_baseDamage, m_basePiercing, m_maxHits, m_lifetime, m_radius};
     }
 
 private:
     float m_baseDamage{0.f};
-    float m_baseSpeed{0.f};
-    float m_speedInterval{0.f};
-    float m_baseRange{0.f};
-    sf::Vector2f m_rangeInterval{0.f, 0.f};
-    float m_baseRadius{0.f};
-    float m_baseCritChance{0.f};
-    float m_baseCritDamage{0.f};
-    float m_baseCD{0.f};
-    float m_baseDuration{0.f};
+    float m_basePiercing{0.f};
+    int m_maxHits{1};
+    float m_lifetime{0.f};
+    float m_radius{0.f};
+};
+
+class KinematicsDataBuilder
+{
+public:
+    KinematicsDataBuilder &setVelocity(const sf::Vector2f &velocity)
+    {
+        m_velocity = velocity;
+        return *this;
+    }
+    KinematicsDataBuilder &setAcceleration(const sf::Vector2f &acceleration)
+    {
+        m_acceleration = acceleration;
+        return *this;
+    }
+    KinematicsDataBuilder &setAngularVelocity(float angularVelocity)
+    {
+        m_angularVelocity = angularVelocity;
+        return *this;
+    }
+    KinematicsDataBuilder &setAngularAcceleration(float angularAcceleration)
+    {
+        m_angularAcceleration = angularAcceleration;
+        return *this;
+    }
+    KinematicsDataBuilder &setScaleVelocity(const sf::Vector2f &scaleVelocity)
+    {
+        m_scaleVelocity = scaleVelocity;
+        return *this;
+    }
+    KinematicsDataBuilder &setBehavior(KinematicsBehavior behavior)
+    {
+        m_behavior = behavior;
+        return *this;
+    }
+    KinematicsDataBuilder &setOrbitRadius(float radius)
+    {
+        m_orbitRadius = radius;
+        return *this;
+    }
+    KinematicsComponentData build() const
+    {
+        return {m_velocity,      m_acceleration, m_angularVelocity, m_angularAcceleration,
+                m_scaleVelocity, m_behavior,     m_orbitRadius};
+    }
+
+private:
+    sf::Vector2f m_velocity{0.f, 0.f};
+    sf::Vector2f m_acceleration{0.f, 0.f};
+    float m_angularVelocity{0.f};
+    float m_angularAcceleration{0.f};
+    sf::Vector2f m_scaleVelocity{0.f, 0.f};
+    KinematicsBehavior m_behavior{KinematicsBehavior::Linear};
+    float m_orbitRadius{0.f};
 };

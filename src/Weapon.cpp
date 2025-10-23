@@ -36,11 +36,10 @@ void Weapon::update(float dt, sf::Vector2f playerPos)
         if (auto visual = getComponent<VisualComponent>()) {
             visual->update(dt);
             visual->setPosition(playerPos);
-            visual->setRotation(weapon->getRotation());
+            // Rotation will be handled by KinematicsComponent later
         }
         if (auto collision = getComponent<CollisionComponent>()) {
             collision->setPosition(playerPos);
-            collision->setRotation(weapon->getRotation());
         }
     }
 }
@@ -53,13 +52,13 @@ void Weapon::draw(sf::RenderTarget &target, sf::RenderStates states) const
         collision->draw(target, states);
 }
 
-void Weapon::addSpeed()
-{
-    if (auto weapon = getComponent<WeaponComponent>())
-        weapon->addSpeed();
-}
-void Weapon::addRange()
-{
-    if (auto weapon = getComponent<WeaponComponent>())
-        weapon->addRange();
-}
+// void Weapon::addDamage(float amount)
+// {
+//     if (auto weapon = getComponent<WeaponComponent>())
+//         weapon->addDamage(amount);
+// }
+// void Weapon::addPiercing()
+// {
+//     if (auto weapon = getComponent<WeaponComponent>())
+//         weapon->addPiercing();
+// }

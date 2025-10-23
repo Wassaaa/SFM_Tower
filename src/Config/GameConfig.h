@@ -4,6 +4,18 @@
 #include <optional>
 #include "../Types.h"
 
+// Kinematics behavior types
+enum class KinematicsBehavior
+{
+    Linear,     // Constant velocity
+    Accelerate, // Changing velocity
+    Homing,     // Track target
+    Orbital,    // Circle around point
+    Extending,  // Scale over time (laser)
+    Sweeping,   // Rotate over time (laser sweep)
+    Pulsing     // Scale up/down repeatedly
+};
+
 // Data structures for component configurations
 struct VisualComponentData
 {
@@ -37,15 +49,21 @@ struct AnimationInfo
 struct WeaponComponentData
 {
     float baseDamage;
-    float baseSpeed;
-    float speedInterval;
-    float baseRange;
-    sf::Vector2f rangeInterval;
-    float baseRadius;
-    float baseCritChance;
-    float baseCritDamage;
-    float baseCD;
-    float baseDuration;
+    float basePiercing;
+    int maxHits;    // -1 for unlimited (beams)
+    float lifetime; // 0 for infinite
+    float radius;
+};
+
+struct KinematicsComponentData
+{
+    sf::Vector2f velocity;
+    sf::Vector2f acceleration;
+    float angularVelocity;
+    float angularAcceleration;
+    sf::Vector2f scaleVelocity;
+    KinematicsBehavior behavior;
+    float orbitRadius;
 };
 
 struct EntityConfig
@@ -54,6 +72,7 @@ struct EntityConfig
     CollisionComponentData collision;
     std::unordered_map<EntityState, AnimationInfo> animations;
     std::optional<WeaponComponentData> weapon;
+    std::optional<KinematicsComponentData> kinematics;
 };
 
 namespace Config {

@@ -4,25 +4,51 @@
 WeaponComponent::WeaponComponent(const WeaponComponentData &data)
     : m_data(data)
     , currentDamage(data.baseDamage)
-    , currentSpeed(data.baseSpeed)
-    , currentCritChance(data.baseCritChance)
-    , currentCritDamage(data.baseCritDamage)
-    , currentRange(data.baseRange)
+    , piercing(data.basePiercing)
+    , currentHits(0)
+    , maxHits(data.maxHits)
+    , lifetime(data.lifetime)
+    , currentLifetime(0.f)
+    , radius(data.radius)
 {}
 
 void WeaponComponent::update(float dt)
 {
-    currentRotation += currentSpeed * dt;
+    currentLifetime += dt;
 }
 
-void WeaponComponent::addSpeed()
+void WeaponComponent::addDamage(float amount)
 {
-    currentSpeed += m_data.speedInterval;
-    std::cout << "Weapon Speed added\n";
+    currentDamage += amount;
+    std::cout << "Weapon Damage increased by " << amount << "\n";
 }
 
-void WeaponComponent::addRange()
+void WeaponComponent::addPiercing()
 {
-    currentRange += m_data.rangeInterval.x;
-    std::cout << "Weapon Range added\n";
+    piercing += 1.f;
+    maxHits += 1;
+    std::cout << "Weapon Piercing increased\n";
+}
+
+void WeaponComponent::addRadius(float amount)
+{
+    radius += amount;
+    std::cout << "Weapon Radius increased by " << amount << "\n";
+}
+
+void WeaponComponent::registerHit()
+{
+    if (maxHits > 0) {
+        currentHits++;
+    }
+}
+
+bool WeaponComponent::canStillHit() const
+{
+    return maxHits < 0 || currentHits < maxHits;
+}
+
+bool WeaponComponent::isExpired() const
+{
+    return lifetime > 0.f && currentLifetime >= lifetime;
 }

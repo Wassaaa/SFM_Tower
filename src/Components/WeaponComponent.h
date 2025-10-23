@@ -19,38 +19,50 @@ public:
     {
         return currentDamage;
     }
-    float getSpeed() const
+    float getLifetime() const
     {
-        return currentSpeed;
+        return currentLifetime;
     }
-    float getCritChance() const
+    float getPiercing() const
     {
-        return currentCritChance;
+        return piercing;
     }
-    float getCritDamage() const
+    float getRadius() const
     {
-        return currentCritDamage;
+        return radius;
     }
-    float getRange() const
+    int getCurrentHits() const
     {
-        return currentRange;
+        return currentHits;
     }
-    float getRotation() const
+    int getMaxHits() const
     {
-        return currentRotation;
+        return maxHits;
     }
 
     // Upgrade methods
-    void addSpeed();
-    void addRange();
+    void addDamage(float amount);
+    void addPiercing();
+    void addRadius(float amount);
+
+    // Hit tracking
+    void registerHit();
+    bool canStillHit() const;
+    bool isExpired() const;
 
 private:
     const WeaponComponentData &m_data;
 
+    // Combat stats
     float currentDamage;
-    float currentSpeed;
-    float currentCritChance;
-    float currentCritDamage;
-    float currentRange;
-    float currentRotation{0.f};
+    float piercing; // How many enemies it can pierce
+    int currentHits;
+    int maxHits; // -1 for unlimited (beams)
+
+    // Lifetime
+    float lifetime;
+    float currentLifetime;
+
+    // Effects
+    float radius; // Collision/damage radius
 };

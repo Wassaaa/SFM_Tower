@@ -28,9 +28,15 @@ public:
         return *this;
     }
 
+    EntityConfigBuilder &setKinematics(const KinematicsComponentData &kinematics)
+    {
+        m_kinematics = kinematics;
+        return *this;
+    }
+
     EntityConfig build() const
     {
-        return {m_visual, m_collision, m_animations, m_weapon};
+        return {m_visual, m_collision, m_animations, m_weapon, m_kinematics};
     }
 
 private:
@@ -39,4 +45,5 @@ private:
                                        {0.f, 0.f}, 0.f,        {255, 0, 0, 128}};
     std::unordered_map<EntityState, AnimationInfo> m_animations;
     std::optional<WeaponComponentData> m_weapon;
+    std::optional<KinematicsComponentData> m_kinematics;
 };
