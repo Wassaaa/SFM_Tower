@@ -54,12 +54,9 @@ public:
     }
 
 private:
-    void updateLinear(float dt, sf::Transformable &transform);
-    void updateAccelerate(float dt, sf::Transformable &transform);
     void updateHoming(float dt, sf::Transformable &transform);
     void updateOrbital(float dt, sf::Transformable &transform);
     void updateExtending(float dt, sf::Transformable &transform);
-    void updateSweeping(float dt, sf::Transformable &transform);
     void updatePulsing(float dt, sf::Transformable &transform);
 
     const KinematicsComponentData &m_data;
@@ -82,5 +79,8 @@ private:
     sf::Vector2f *targetPoint{nullptr}; // For homing/orbital
     float orbitRadius{0.f};
     float orbitAngle{0.f};
+    float orbitAngularVelocity{0.f};
+    float pulseFrequency{5.f};
+    float pulseAmplitude{0.2f};
     float currentTime{0.f};
 };

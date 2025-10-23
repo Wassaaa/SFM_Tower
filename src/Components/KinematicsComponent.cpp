@@ -12,6 +12,9 @@ KinematicsComponent::KinematicsComponent(const KinematicsComponentData &data)
     , scaleVelocity(data.scaleVelocity)
     , behavior(data.behavior)
     , orbitRadius(data.orbitRadius)
+    , orbitAngularVelocity(data.orbitAngularVelocity)
+    , pulseFrequency(data.pulseFrequency)
+    , pulseAmplitude(data.pulseAmplitude)
 {}
 
 void KinematicsComponent::update(float dt, sf::Transformable &visualTransform,
@@ -19,48 +22,41 @@ void KinematicsComponent::update(float dt, sf::Transformable &visualTransform,
 {
     currentTime += dt;
 
-    switch (behavior) {
-    case KinematicsBehavior::Linear:
-        updateLinear(dt, visualTransform);
-        break;
-    case KinematicsBehavior::Accelerate:
-        updateAccelerate(dt, visualTransform);
-        break;
-    case KinematicsBehavior::Homing:
+    // Apply behaviors - can have multiple active at once!
+    if (hasFlag(behavior, KinematicsBehavior::Accelerate)) {
+        velocity += acceleration * dt;
+        angularVelocity += angularAcceleration * dt;
+    }
+
+    if (hasFlag(behavior, KinematicsBehavior::Homing)) {
         updateHoming(dt, visualTransform);
-        break;
-    case KinematicsBehavior::Orbital:
+    }
+
+    if (hasFlag(behavior, KinematicsBehavior::Orbital)) {
         updateOrbital(dt, visualTransform);
-        break;
-    case KinematicsBehavior::Extending:
+    }
+    else if (hasFlag(behavior, KinematicsBehavior::Linear) ||
+             hasFlag(behavior, KinematicsBehavior::Accelerate)) {
+        // Only move linearly if not orbiting (orbital sets position directly)
+        visualTransform.move(velocity * dt);
+    }
+
+    if (hasFlag(behavior, KinematicsBehavior::Rotating)) {
+        visualTransform.rotate(angularVelocity * dt);
+    }
+
+    if (hasFlag(behavior, KinematicsBehavior::Extending)) {
         updateExtending(dt, visualTransform);
-        break;
-    case KinematicsBehavior::Sweeping:
-        updateSweeping(dt, visualTransform);
-        break;
-    case KinematicsBehavior::Pulsing:
+    }
+
+    if (hasFlag(behavior, KinematicsBehavior::Pulsing)) {
         updatePulsing(dt, visualTransform);
-        break;
     }
 
     // Sync collision with visual
     collisionTransform.setPosition(visualTransform.getPosition());
     collisionTransform.setRotation(visualTransform.getRotation());
     collisionTransform.setScale(visualTransform.getScale());
-}
-
-void KinematicsComponent::updateLinear(float dt, sf::Transformable &transform)
-{
-    transform.move(velocity * dt);
-    transform.rotate(angularVelocity * dt);
-}
-
-void KinematicsComponent::updateAccelerate(float dt, sf::Transformable &transform)
-{
-    velocity += acceleration * dt;
-    angularVelocity += angularAcceleration * dt;
-    transform.move(velocity * dt);
-    transform.rotate(angularVelocity * dt);
 }
 
 void KinematicsComponent::updateHoming(float dt, sf::Transformable &transform)
@@ -82,12 +78,12 @@ void KinematicsComponent::updateHoming(float dt, sf::Transformable &transform)
 void KinematicsComponent::updateOrbital(float dt, sf::Transformable &transform)
 {
     if (targetPoint) {
-        orbitAngle += angularVelocity * dt;
+        orbitAngle += orbitAngularVelocity * dt;
         float radians = orbitAngle * 3.14159f / 180.f;
 
         sf::Vector2f offset(std::cos(radians) * orbitRadius, std::sin(radians) * orbitRadius);
         transform.setPosition(*targetPoint + offset);
-        transform.setRotation(orbitAngle + 90.f); // Face direction of movement
+        // Don't set rotation here - let Rotating behavior handle it independently
     }
 }
 
@@ -97,14 +93,9 @@ void KinematicsComponent::updateExtending(float dt, sf::Transformable &transform
     transform.setScale(currentScale + scaleVelocity * dt);
 }
 
-void KinematicsComponent::updateSweeping(float dt, sf::Transformable &transform)
-{
-    transform.rotate(angularVelocity * dt);
-}
-
 void KinematicsComponent::updatePulsing(float dt, sf::Transformable &transform)
 {
-    // Pulse using sine wave
-    float pulseScale = 1.f + 0.2f * std::sin(currentTime * 5.f);
+    // Pulse using sine wave with configurable frequency and amplitude
+    float pulseScale = 1.f + pulseAmplitude * std::sin(currentTime * pulseFrequency);
     transform.setScale(sf::Vector2f(pulseScale, pulseScale));
 }

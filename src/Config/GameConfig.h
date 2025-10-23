@@ -4,17 +4,34 @@
 #include <optional>
 #include "../Types.h"
 
-// Kinematics behavior types
-enum class KinematicsBehavior
+// Kinematics behavior types (can be combined with bitwise OR)
+enum class KinematicsBehavior : uint32_t
 {
-    Linear,     // Constant velocity
-    Accelerate, // Changing velocity
-    Homing,     // Track target
-    Orbital,    // Circle around point
-    Extending,  // Scale over time (laser)
-    Sweeping,   // Rotate over time (laser sweep)
-    Pulsing     // Scale up/down repeatedly
+    None = 0,
+    Linear = 1 << 0,     // Move with velocity
+    Accelerate = 1 << 1, // Velocity changes over time
+    Homing = 1 << 2,     // Track target position
+    Orbital = 1 << 3,    // Circle around point
+    Rotating = 1 << 4,   // Rotate over time (was Sweeping)
+    Extending = 1 << 5,  // Scale over time (lasers)
+    Pulsing = 1 << 6     // Scale up/down repeatedly
 };
+
+// Enable bitwise operations
+inline KinematicsBehavior operator|(KinematicsBehavior a, KinematicsBehavior b)
+{
+    return static_cast<KinematicsBehavior>(static_cast<uint32_t>(a) | static_cast<uint32_t>(b));
+}
+
+inline KinematicsBehavior operator&(KinematicsBehavior a, KinematicsBehavior b)
+{
+    return static_cast<KinematicsBehavior>(static_cast<uint32_t>(a) & static_cast<uint32_t>(b));
+}
+
+inline bool hasFlag(KinematicsBehavior value, KinematicsBehavior flag)
+{
+    return (static_cast<uint32_t>(value) & static_cast<uint32_t>(flag)) != 0;
+}
 
 // Data structures for component configurations
 struct VisualComponentData
@@ -64,6 +81,9 @@ struct KinematicsComponentData
     sf::Vector2f scaleVelocity;
     KinematicsBehavior behavior;
     float orbitRadius;
+    float orbitAngularVelocity;
+    float pulseFrequency;
+    float pulseAmplitude;
 };
 
 struct EntityConfig

@@ -32,7 +32,7 @@ void Weapon::initComponents()
     }
 }
 
-void Weapon::update(float dt, sf::Vector2f playerPos)
+void Weapon::update(float dt, sf::Vector2f ownerPos)
 {
     if (auto weapon = getComponent<WeaponComponent>()) {
         weapon->update(dt);
@@ -43,16 +43,23 @@ void Weapon::update(float dt, sf::Vector2f playerPos)
     auto *kinematics = getComponent<KinematicsComponent>();
 
     if (kinematics && visual && collision) {
-        // Set position to player/tower position first
-        visual->setPosition(playerPos);
-        // KinematicsComponent handles rotation and other transforms
+        // Initialize position to owner on first update
+        if (!m_positionInitialized) {
+            visual->setPosition(ownerPos);
+            collision->setPosition(ownerPos);
+            m_positionInitialized = true;
+        }
+        // Update orbit center for orbital/homing behaviors
+        m_orbitCenter = ownerPos;
+        kinematics->setTargetPoint(&m_orbitCenter);
+        
+        // KinematicsComponent handles all transforms (position, rotation, scale)
         kinematics->update(dt, *visual, *collision);
     }
     else if (visual && collision) {
-        // Fallback for weapons without kinematics
-        visual->update(dt);
-        visual->setPosition(playerPos);
-        collision->setPosition(playerPos);
+        // Fallback for weapons without kinematics - just stay attached to owner
+        visual->setPosition(ownerPos);
+        collision->setPosition(ownerPos);
     }
 }
 

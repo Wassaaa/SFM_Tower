@@ -216,10 +216,26 @@ public:
         m_orbitRadius = radius;
         return *this;
     }
+    KinematicsDataBuilder &setOrbitAngularVelocity(float angVel)
+    {
+        m_orbitAngularVelocity = angVel;
+        return *this;
+    }
+    KinematicsDataBuilder &setPulseFrequency(float freq)
+    {
+        m_pulseFrequency = freq;
+        return *this;
+    }
+    KinematicsDataBuilder &setPulseAmplitude(float amp)
+    {
+        m_pulseAmplitude = amp;
+        return *this;
+    }
     KinematicsComponentData build() const
     {
-        return {m_velocity,      m_acceleration, m_angularVelocity, m_angularAcceleration,
-                m_scaleVelocity, m_behavior,     m_orbitRadius};
+        return {m_velocity,       m_acceleration,  m_angularVelocity, m_angularAcceleration,
+                m_scaleVelocity,  m_behavior,      m_orbitRadius,     m_orbitAngularVelocity,
+                m_pulseFrequency, m_pulseAmplitude};
     }
 
 private:
@@ -230,4 +246,7 @@ private:
     sf::Vector2f m_scaleVelocity{0.f, 0.f};
     KinematicsBehavior m_behavior{KinematicsBehavior::Linear};
     float m_orbitRadius{0.f};
+    float m_orbitAngularVelocity{0.f};
+    float m_pulseFrequency{5.f};  // Default: 5 cycles/sec
+    float m_pulseAmplitude{0.2f}; // Default: 20% size change
 };

@@ -10,7 +10,7 @@ public:
     Weapon(EntityType type);
     ~Weapon() = default;
 
-    void update(float dt, sf::Vector2f playerPos);
+    void update(float dt, sf::Vector2f ownerPos);
     void draw(sf::RenderTarget &target, sf::RenderStates states) const;
 
     // Upgrade methods
@@ -26,4 +26,6 @@ private:
     void initComponents();
 
     const EntityType m_type;
+    bool m_positionInitialized{false};
+    sf::Vector2f m_orbitCenter;
 };
