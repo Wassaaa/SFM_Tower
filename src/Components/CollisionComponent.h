@@ -2,6 +2,7 @@
 #include "Component.h"
 #include "../Config/GameConfig.h"
 #include <SFML/Graphics.hpp>
+#include <array>
 
 class CollisionComponent : public Component, public sf::Drawable, public sf::Transformable
 {
@@ -43,4 +44,8 @@ private:
     // member functions
     void initShape();
     void applyTransforms();
+    bool intersectsOBB(const CollisionComponent &other) const;
+    void getWorldCorners(std::array<sf::Vector2f, 4> &corners) const;
+    void projectOntoAxis(const std::array<sf::Vector2f, 4> &corners, const sf::Vector2f &axis,
+                         float &min, float &max) const;
 };

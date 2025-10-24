@@ -19,6 +19,12 @@ inline float ToDegrees(float radians)
     return radians * RAD_TO_DEG;
 }
 
+// Vectors
+inline float DotProduct(sf::Vector2f a, sf::Vector2f b)
+{
+    return a.x * b.x + a.y * b.y;
+}
+
 // Vector magnitude calculations
 inline float VecLengthSquared(sf::Vector2f a)
 {
