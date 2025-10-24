@@ -1,11 +1,13 @@
 #include "KinematicsComponent.h"
 #include "VisualComponent.h"
 #include "CollisionComponent.h"
+#include "../MathUtils.h"
 #include <cmath>
 
 KinematicsComponent::KinematicsComponent(const KinematicsComponentData &data)
     : m_data(data)
     , velocity(data.velocity)
+    , speed(std::sqrt(data.velocity.x * data.velocity.x + data.velocity.y * data.velocity.y))
     , acceleration(data.acceleration)
     , angularVelocity(data.angularVelocity)
     , angularAcceleration(data.angularAcceleration)
@@ -25,6 +27,7 @@ void KinematicsComponent::update(float dt, sf::Transformable &visualTransform,
     // Apply behaviors - can have multiple active at once!
     if (hasFlag(behavior, KinematicsBehavior::Accelerate)) {
         velocity += acceleration * dt;
+        speed = VecLength(velocity);
         angularVelocity += angularAcceleration * dt;
     }
 
@@ -64,13 +67,9 @@ void KinematicsComponent::updateHoming(float dt, sf::Transformable &transform)
     if (targetPoint) {
         sf::Vector2f currentPos = transform.getPosition();
         sf::Vector2f direction = *targetPoint - currentPos;
-        float length = std::sqrt(direction.x * direction.x + direction.y * direction.y);
+        direction = VecNormalized(direction);
 
-        if (length > 0.f) {
-            direction /= length; // Normalize
-            float speed = std::sqrt(velocity.x * velocity.x + velocity.y * velocity.y);
-            velocity = direction * speed;
-        }
+        velocity = direction * speed;
     }
     transform.move(velocity * dt);
 }
@@ -79,11 +78,10 @@ void KinematicsComponent::updateOrbital(float dt, sf::Transformable &transform)
 {
     if (targetPoint) {
         orbitAngle += orbitAngularVelocity * dt;
-        float radians = orbitAngle * 3.14159f / 180.f;
+        float radians = ToRadians(orbitAngle);
 
         sf::Vector2f offset(std::cos(radians) * orbitRadius, std::sin(radians) * orbitRadius);
         transform.setPosition(*targetPoint + offset);
-        // Don't set rotation here - let Rotating behavior handle it independently
     }
 }
 

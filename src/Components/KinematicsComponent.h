@@ -64,6 +64,7 @@ private:
     // Linear motion
     sf::Vector2f velocity;
     sf::Vector2f acceleration;
+    float speed;
 
     // Rotational motion
     float angularVelocity;
