@@ -14,14 +14,8 @@ public:
     bool update(float dt);
 
     // setters
-    void play()
-    {
-        this->animPlaying = true;
-    }
-    void pause()
-    {
-        this->animPlaying = false;
-    }
+    void play() { this->animPlaying = true; }
+    void pause() { this->animPlaying = false; }
     void stop()
     {
         this->animPlaying = false;
@@ -30,18 +24,9 @@ public:
     }
 
     // getters
-    const sf::IntRect getCurrentFrame() const
-    {
-        return frames[currentFrame];
-    }
-    const bool isLooping() const
-    {
-        return animLooping;
-    }
-    const bool isPlaying() const
-    {
-        return animPlaying;
-    }
+    const sf::IntRect getCurrentFrame() const { return frames[currentFrame]; }
+    const bool isLooping() const { return animLooping; }
+    const bool isPlaying() const { return animPlaying; }
 
 private:
     std::vector<sf::IntRect> frames;

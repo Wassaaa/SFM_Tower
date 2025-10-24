@@ -16,8 +16,7 @@ Anim::Anim(sf::Time frameDuration, bool loop)
     , animPlaying(false)
 {}
 
-Anim::~Anim()
-{}
+Anim::~Anim() {}
 
 void Anim::addFrame(const sf::IntRect &frame)
 {

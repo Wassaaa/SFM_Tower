@@ -6,8 +6,7 @@ GameInput::GameInput(Game *pGame, Player *pPlayer)
     , m_pPlayer(pPlayer)
 {}
 
-GameInput::~GameInput()
-{}
+GameInput::~GameInput() {}
 
 void GameInput::update(float deltaTime)
 {

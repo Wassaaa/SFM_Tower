@@ -26,10 +26,7 @@ public:
     void update(float deltaTime);
     void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
 
-    GameState getState() const
-    {
-        return m_state;
-    }
+    GameState getState() const { return m_state; }
 
     void onKeyPressed(sf::Keyboard::Key key);
     void onKeyReleased(sf::Keyboard::Key key);

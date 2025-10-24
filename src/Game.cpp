@@ -16,8 +16,7 @@ Game::Game()
     m_pTower = std::make_unique<Tower>(this, towerPosition);
 }
 
-Game::~Game()
-{}
+Game::~Game() {}
 
 bool Game::initialise()
 {
