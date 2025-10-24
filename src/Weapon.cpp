@@ -15,6 +15,7 @@ Weapon::Weapon(EntityType type)
 void Weapon::initComponents()
 {
     const EntityData &entityData = EntityManager::getInstance().getEntityData(m_type);
+    const EntityConfig &config = Config::ENTITY_CONFIGS.at(m_type);
 
     if (auto *visual = entityData.getComponent<VisualComponent>())
         addComponent<VisualComponent>(*visual);
@@ -24,10 +25,11 @@ void Weapon::initComponents()
         addComponent<WeaponComponent>(*weapon);
     if (auto *kinematics = entityData.getComponent<KinematicsComponent>())
         addComponent<KinematicsComponent>(*kinematics);
-    if (auto *animData = entityData.getComponent<AnimationData>()) {
+    
+    // Add animations directly from config
+    if (!config.animations.empty()) {
         auto &animComponent = addComponent<AnimationComponent>(*getComponent<VisualComponent>());
-        // Load animations from animation data
-        for (const auto &[state, info] : animData->animations)
+        for (const auto &[state, info] : config.animations)
             animComponent.addAnimation(state, info);
     }
 }

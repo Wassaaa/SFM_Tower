@@ -23,16 +23,18 @@ void Tower::initVariables()
 void Tower::initComponents()
 {
     const EntityData &entityData = EntityManager::getInstance().getEntityData(EntityType::TOWER);
+    const EntityConfig &config = Config::ENTITY_CONFIGS.at(EntityType::TOWER);
 
     // Add components from entity data
     if (auto *visual = entityData.getComponent<VisualComponent>())
         addComponent<VisualComponent>(*visual);
     if (auto *collision = entityData.getComponent<CollisionComponent>())
         addComponent<CollisionComponent>(*collision);
-    if (auto *animData = entityData.getComponent<AnimationData>()) {
+    
+    // Add animations directly from config
+    if (!config.animations.empty()) {
         auto &animComponent = addComponent<AnimationComponent>(*getComponent<VisualComponent>());
-        // Load animations from animation data
-        for (const auto &[state, info] : animData->animations)
+        for (const auto &[state, info] : config.animations)
             animComponent.addAnimation(state, info);
     }
 

@@ -45,17 +45,3 @@ private:
     EntityState previousAnimation{EntityState::NOTHING};
     EntityState defaultAnimation{EntityState::NOTHING};
 };
-
-struct AnimationData : public Component
-{
-    std::unordered_map<EntityState, AnimationInfo> animations;
-
-    void addAnimation(EntityState state, const AnimationInfo &info)
-    {
-        animations.try_emplace(state, info);
-    }
-    virtual const char *getName() const override
-    {
-        return "AnimationData";
-    }
-};

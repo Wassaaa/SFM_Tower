@@ -47,7 +47,8 @@ void AnimationComponent::playAnimation(EntityState newAnimation)
         bool shouldFlip = animationFlipX[newAnimation];
         if (shouldFlip && currentScale.x > 0) {
             m_visual.setScale(-currentScale.x, currentScale.y);
-        } else if (!shouldFlip && currentScale.x < 0) {
+        }
+        else if (!shouldFlip && currentScale.x < 0) {
             m_visual.setScale(-currentScale.x, currentScale.y);
         }
     }

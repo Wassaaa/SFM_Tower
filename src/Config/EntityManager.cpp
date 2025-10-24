@@ -12,8 +12,6 @@ void EntityManager::loadEntityData()
         EntityData &entity = entityData[type];
         entity.addComponent<VisualComponent>(config.visual);
         entity.addComponent<CollisionComponent>(config.collision);
-        auto &animData = entity.addComponent<AnimationData>();
-        for (const auto &[state, info] : config.animations) animData.addAnimation(state, info);
 
         if (config.weapon.has_value())
             entity.addComponent<WeaponComponent>(config.weapon.value());
