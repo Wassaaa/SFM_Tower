@@ -1,63 +1,49 @@
 #include "InputHandler.h"
-#include "Weapon.h"
 
-GameInput::GameInput(Game *pGame, Player *pPlayer)
-    : m_pGame(pGame)
-    , m_pPlayer(pPlayer)
-{}
-
-GameInput::~GameInput() {}
-
-void GameInput::update(float deltaTime)
+void InputHandler::onKeyPressed(sf::Keyboard::Key key)
 {
-    if (m_inputData.hasInputs()) {
-        // m_pPlayer->move(m_inputData, deltaTime);
-        // m_pPlayer->move(m_inputData);
-    }
+    // Movement (WASD)
+    if (key == sf::Keyboard::W)
+        m_state.moveUp = true;
+    else if (key == sf::Keyboard::S)
+        m_state.moveDown = true;
+    else if (key == sf::Keyboard::A)
+        m_state.moveLeft = true;
+    else if (key == sf::Keyboard::D)
+        m_state.moveRight = true;
 
-    if (m_inputData.m_space) {
-        // m_pPlayer->attack();
+    // Actions
+    else if (key == sf::Keyboard::Space) {
+        if (m_state.action1Released)
+            m_state.action1 = true;
+        m_state.action1Released = false;
+    }
+    else if (key == sf::Keyboard::B) {
+        if (m_state.spawnBoxReleased)
+            m_state.spawnBox = true;
+        m_state.spawnBoxReleased = false;
     }
 }
 
-void GameInput::onKeyPressed(sf::Keyboard::Key key)
+void InputHandler::onKeyReleased(sf::Keyboard::Key key)
 {
-    if (key == sf::Keyboard::Up) {
-        m_inputData.m_movingUp = true;
-    }
-    else if (key == sf::Keyboard::Down) {
-        m_inputData.m_movingDown = true;
-    }
-    else if (key == sf::Keyboard::Left) {
-        m_inputData.m_movingLeft = true;
-    }
-    else if (key == sf::Keyboard::Right) {
-        m_inputData.m_movingRight = true;
-    }
-    else if (key == sf::Keyboard::Space) {
-        if (m_inputData.m_spaceReleased) {
-            m_inputData.m_space = true;
-        }
-        m_inputData.m_spaceReleased = false;
-    }
-}
+    // Movement (WASD)
+    if (key == sf::Keyboard::W)
+        m_state.moveUp = false;
+    else if (key == sf::Keyboard::S)
+        m_state.moveDown = false;
+    else if (key == sf::Keyboard::A)
+        m_state.moveLeft = false;
+    else if (key == sf::Keyboard::D)
+        m_state.moveRight = false;
 
-void GameInput::onKeyReleased(sf::Keyboard::Key key)
-{
-    if (key == sf::Keyboard::Up) {
-        m_inputData.m_movingUp = false;
-    }
-    else if (key == sf::Keyboard::Down) {
-        m_inputData.m_movingDown = false;
-    }
-    else if (key == sf::Keyboard::Left) {
-        m_inputData.m_movingLeft = false;
-    }
-    else if (key == sf::Keyboard::Right) {
-        m_inputData.m_movingRight = false;
-    }
+    // Actions
     else if (key == sf::Keyboard::Space) {
-        m_inputData.m_space = false;
-        m_inputData.m_spaceReleased = true;
+        m_state.action1 = false;
+        m_state.action1Released = true;
+    }
+    else if (key == sf::Keyboard::B) {
+        m_state.spawnBox = false;
+        m_state.spawnBoxReleased = true;
     }
 }

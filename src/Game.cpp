@@ -10,6 +10,7 @@
 #include "Entity.h"
 #include "Components/CollisionComponent.h"
 #include "Components/KinematicsComponent.h"
+#include "Constants.h"
 
 Game::Game()
     : m_state(GameState::ACTIVE)
@@ -38,21 +39,11 @@ bool Game::initialise()
     // Add a weapon to the tower for testing
     m_pTower->addWeapon(EntityType::LASER_WEAPON);
 
-    // Create test entities - player controlled box
+    // Create a player controlled box
     auto playerEntity =
         std::make_unique<Entity>(this, EntityType::TEST_BOX, sf::Vector2f(200.f, 200.f));
     m_pPlayerEntity = playerEntity.get();
     m_entities.push_back(std::move(playerEntity));
-
-    // Create static test boxes with random positions
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_real_distribution<> posDist(100.f, 700.f);
-
-    for (int i = 0; i < 5; i++) {
-        m_entities.push_back(std::make_unique<Entity>(this, EntityType::TEST_BOX,
-                                                      sf::Vector2f(posDist(gen), posDist(gen))));
-    }
 
     return true;
 }
@@ -66,9 +57,16 @@ void Game::update(float deltaTime)
     case GameState::ACTIVE: {
         m_pTower->update(deltaTime);
 
-        // Handle player entity input
+        const InputState &input = m_inputHandler.getState();
+
+        // Handle game-level input actions
+        if (input.spawnBox) {
+            spawnRandomBox();
+        }
+
+        // Pass input to player entity
         if (m_pPlayerEntity) {
-            m_pPlayerEntity->handleInput(deltaTime, m_keyW, m_keyA, m_keyS, m_keyD);
+            m_pPlayerEntity->handleInput(deltaTime, input);
         }
 
         // Update all entities
@@ -119,45 +117,26 @@ void Game::draw(sf::RenderTarget &target, sf::RenderStates states) const
 
 void Game::onKeyPressed(sf::Keyboard::Key key)
 {
-    switch (key) {
-    case sf::Keyboard::W:
-        m_keyW = true;
-        break;
-    case sf::Keyboard::A:
-        m_keyA = true;
-        break;
-    case sf::Keyboard::S:
-        m_keyS = true;
-        break;
-    case sf::Keyboard::D:
-        m_keyD = true;
-        break;
-    default:
-        break;
-    }
+    m_inputHandler.onKeyPressed(key);
 }
 
 void Game::onKeyReleased(sf::Keyboard::Key key)
 {
-    switch (key) {
-    case sf::Keyboard::W:
-        m_keyW = false;
-        break;
-    case sf::Keyboard::A:
-        m_keyA = false;
-        break;
-    case sf::Keyboard::S:
-        m_keyS = false;
-        break;
-    case sf::Keyboard::D:
-        m_keyD = false;
-        break;
-    default:
-        break;
-    }
+    m_inputHandler.onKeyReleased(key);
 }
 
 Tower *Game::getTower() const
 {
     return m_pTower.get();
+}
+
+void Game::spawnRandomBox()
+{
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<> width(0, Constants::SCREEN_WIDTH);
+    std::uniform_real_distribution<> height(0, Constants::SCREEN_HEIGHT);
+
+    m_entities.push_back(std::make_unique<Entity>(this, EntityType::TEST_BOX,
+                                                  sf::Vector2f(width(gen), height(gen))));
 }

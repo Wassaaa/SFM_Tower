@@ -4,6 +4,7 @@
 #include "Components/VisualComponent.h"
 #include "Components/CollisionComponent.h"
 #include "Components/KinematicsComponent.h"
+#include "InputHandler.h"
 #include <cmath>
 
 Entity::Entity(Game *pGame, EntityType type, const sf::Vector2f &position)
@@ -74,20 +75,20 @@ void Entity::draw(sf::RenderTarget &target, sf::RenderStates states) const
     }
 }
 
-void Entity::handleInput(float deltaTime, bool keyW, bool keyA, bool keyS, bool keyD)
+void Entity::handleInput(float deltaTime, const InputState &input)
 {
     // Set velocity based on input
     if (auto *kinematics = getComponent<KinematicsComponent>()) {
         sf::Vector2f velocity(0.f, 0.f);
         const float speed = 200.f;
 
-        if (keyW)
+        if (input.moveUp)
             velocity.y -= speed;
-        if (keyS)
+        if (input.moveDown)
             velocity.y += speed;
-        if (keyA)
+        if (input.moveLeft)
             velocity.x -= speed;
-        if (keyD)
+        if (input.moveRight)
             velocity.x += speed;
 
         // Normalize diagonal movement

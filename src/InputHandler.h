@@ -2,36 +2,34 @@
 
 #include <SFML/Window/Keyboard.hpp>
 
-class Player;
-class Game;
-
-struct InputData
+struct InputState
 {
-    bool m_movingUp = false;
-    bool m_movingDown = false;
-    bool m_movingLeft = false;
-    bool m_movingRight = false;
-    bool m_space = false;
-    bool m_spaceReleased = true;
+    // Movement
+    bool moveUp = false;
+    bool moveDown = false;
+    bool moveLeft = false;
+    bool moveRight = false;
 
-    bool hasInputs()
-    {
-        return m_movingUp || m_movingDown || m_movingLeft || m_movingRight || m_space;
-    }
+    // Actions
+    bool action1 = false;
+    bool action1Released = true;
+    bool spawnBox = false;
+    bool spawnBoxReleased = true;
+
+    bool hasMovementInput() const { return moveUp || moveDown || moveLeft || moveRight; }
 };
 
-class GameInput
+class InputHandler
 {
 public:
-    GameInput(Game *pGame, Player *pPlayer);
-    ~GameInput();
+    InputHandler() = default;
+    ~InputHandler() = default;
 
-    void update(float deltaTime);
     void onKeyPressed(sf::Keyboard::Key key);
     void onKeyReleased(sf::Keyboard::Key key);
 
+    const InputState &getState() const { return m_state; }
+
 private:
-    InputData m_inputData;
-    Game *m_pGame;
-    Player *m_pPlayer;
+    InputState m_state;
 };

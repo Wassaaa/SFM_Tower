@@ -8,11 +8,11 @@
 #include <unordered_set>
 #include "Constants.h"
 #include "Types.h"
+#include "InputHandler.h"
 
 class Tower;
 class Entity;
 class Game;
-class GameInput;
 
 namespace sf {
     class Clock;
@@ -36,6 +36,8 @@ public:
     Tower *getTower() const;
     Entity *getPlayerEntity() const { return m_pPlayerEntity; }
 
+    void spawnRandomBox();
+
 private:
     std::unique_ptr<Tower> m_pTower;
     std::vector<std::unique_ptr<Entity>> m_entities;
@@ -46,6 +48,5 @@ private:
 
     sf::Font m_font;
 
-    // Input state for WASD
-    bool m_keyW{false}, m_keyA{false}, m_keyS{false}, m_keyD{false};
+    InputHandler m_inputHandler;
 };

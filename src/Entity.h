@@ -5,6 +5,7 @@
 #include "Types.h"
 
 class Game;
+struct InputState;
 
 class Entity : public ComponentContainer
 {
@@ -21,7 +22,7 @@ public:
     EntityType getType() const { return m_type; }
     void setColliding(bool colliding);
 
-    void handleInput(float deltaTime, bool keyW, bool keyA, bool keyS, bool keyD);
+    void handleInput(float deltaTime, const InputState &input);
 
 private:
     void initComponents();
