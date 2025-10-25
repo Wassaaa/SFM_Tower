@@ -49,27 +49,11 @@ void Tower::initComponents()
 
 void Tower::update(float &dt)
 {
-    updateAnimation(dt);
-
-    if (auto *visual = getComponent<VisualComponent>()) {
-        RenderSystem::updateVisual(*visual, getComponent<AnimationComponent>(),
-                                   getComponent<DirectionComponent>());
-    }
+    RenderSystem::updateAnimationAndVisual(this, dt);
 
     // Update weapons with tower position
     for (auto &weapon : weapons) {
         weapon->update(dt, m_position);
-    }
-}
-
-void Tower::updateAnimation(float &dt)
-{
-    if (auto *anim = getComponent<AnimationComponent>()) {
-        if (currentState != EntityState::IDLE) {
-            currentState = EntityState::IDLE;
-            anim->playAnimation(currentState);
-        }
-        anim->update(dt);
     }
 }
 

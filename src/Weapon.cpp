@@ -64,15 +64,7 @@ void Weapon::update(float dt, sf::Vector2f ownerPos)
         collision->setPosition(ownerPos);
     }
 
-    if (auto *anim = getComponent<AnimationComponent>()) {
-        anim->update(dt);
-    }
-
-    // Apply animation frame and direction to visual (non-const context)
-    if (visual) {
-        RenderSystem::updateVisual(*visual, getComponent<AnimationComponent>(),
-                                   getComponent<DirectionComponent>());
-    }
+    RenderSystem::updateAnimationAndVisual(this, dt);
 }
 void Weapon::draw(sf::RenderTarget &target, sf::RenderStates states) const
 {

@@ -1,4 +1,5 @@
 #include "RenderSystem.h"
+#include "Components/ComponentContainer.h"
 #include <cmath>
 
 void RenderSystem::applyDirection(VisualComponent &visual, const DirectionComponent &direction)
@@ -27,5 +28,22 @@ void RenderSystem::updateVisual(VisualComponent &visual, const AnimationComponen
 
     if (direction) {
         applyDirection(visual, *direction);
+    }
+}
+
+void RenderSystem::updateAnimationAndVisual(ComponentContainer *entity, float dt)
+{
+    if (!entity)
+        return;
+
+    // Update animation state
+    if (auto *anim = entity->getComponent<AnimationComponent>()) {
+        anim->update(dt);
+    }
+
+    // Apply animation frame and direction to visual
+    if (auto *visual = entity->getComponent<VisualComponent>()) {
+        updateVisual(*visual, entity->getComponent<AnimationComponent>(),
+                     entity->getComponent<DirectionComponent>());
     }
 }
