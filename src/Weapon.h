@@ -1,28 +1,24 @@
 #pragma once
-#include "Components/ComponentContainer.h"
+#include "Entity.h"
 #include "Types.h"
 
-class Game;
-
-class Weapon : public ComponentContainer
+class Weapon : public Entity
 {
 public:
-    Weapon(EntityType type);
+    Weapon(Entity *owner, EntityType type);
     ~Weapon() = default;
 
-    void update(float dt, sf::Vector2f ownerPos);
-    void draw(sf::RenderTarget &target, sf::RenderStates states) const;
+    void update(float dt) override;
+    void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
 
     // Upgrade methods
     void addSpeed();
     void addRange();
 
-    EntityType getType() const { return m_type; }
+protected:
+    void initComponents() override;
 
 private:
-    void initComponents();
-
-    const EntityType m_type;
-    bool m_positionInitialized{false};
+    Entity *m_owner;
     sf::Vector2f m_orbitCenter;
 };

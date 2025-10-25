@@ -6,10 +6,10 @@
 #include "Components/WeaponComponent.h"
 #include "Components/KinematicsComponent.h"
 #include "Components/DirectionComponent.h"
-#include "RenderSystem.h"
 
-Weapon::Weapon(EntityType type)
-    : m_type(type)
+Weapon::Weapon(Entity *owner, EntityType type)
+    : Entity(owner->getGame(), type, owner->getPosition())
+    , m_owner(owner)
 {
     initComponents();
 }
@@ -34,44 +34,43 @@ void Weapon::initComponents()
         auto &animComponent = addComponent<AnimationComponent>();
         for (const auto &[state, info] : config.animations) animComponent.addAnimation(state, info);
     }
+
+    // Initialize position to owner's position
+    setPosition(m_owner->getPosition());
 }
 
-void Weapon::update(float dt, sf::Vector2f ownerPos)
+void Weapon::update(float dt)
 {
     if (auto weapon = getComponent<WeaponComponent>()) {
         weapon->update(dt);
     }
 
-    auto *visual = getComponent<VisualComponent>();
-    auto *collision = getComponent<CollisionComponent>();
-    auto *kinematics = getComponent<KinematicsComponent>();
+    sf::Vector2f ownerPos = m_owner->getPosition();
 
-    if (kinematics && visual && collision) {
-        // Initialize position to owner on first update
-        if (!m_positionInitialized) {
-            visual->setPosition(ownerPos);
-            collision->setPosition(ownerPos);
-            m_positionInitialized = true;
-        }
+    auto *kinematics = getComponent<KinematicsComponent>();
+    if (kinematics) {
         // Update orbit center for orbital/homing behaviors
         m_orbitCenter = ownerPos;
-
         kinematics->setTargetPoint(&m_orbitCenter);
-        kinematics->update(dt, *visual, *collision);
+
+        auto *visual = getComponent<VisualComponent>();
+        auto *collision = getComponent<CollisionComponent>();
+        if (visual && collision) {
+            kinematics->update(dt, *visual, *collision);
+        }
     }
-    else if (visual && collision) {
-        visual->setPosition(ownerPos);
-        collision->setPosition(ownerPos);
+    else {
+        // No kinematics, just follow owner position
+        setPosition(ownerPos);
     }
 
-    RenderSystem::updateAnimationAndVisual(this, dt);
+    updateAnimationAndVisual(dt);
 }
+
 void Weapon::draw(sf::RenderTarget &target, sf::RenderStates states) const
 {
-    // Just draw - visual already updated in update()
-    if (auto *visual = getComponent<VisualComponent>()) {
-        visual->draw(target, states);
-    }
-    if (auto *collision = getComponent<CollisionComponent>())
-        collision->draw(target, states);
+    Entity::draw(target, states);
 }
+
+void Weapon::addSpeed() {}
+void Weapon::addRange() {}

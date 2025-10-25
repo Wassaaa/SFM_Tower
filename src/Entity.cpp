@@ -4,6 +4,8 @@
 #include "Components/VisualComponent.h"
 #include "Components/CollisionComponent.h"
 #include "Components/KinematicsComponent.h"
+#include "Components/AnimationComponent.h"
+#include "Components/DirectionComponent.h"
 #include "InputHandler.h"
 #include <cmath>
 
@@ -106,5 +108,42 @@ void Entity::setColliding(bool colliding)
 {
     if (auto *collision = getComponent<CollisionComponent>()) {
         collision->setColliding(colliding);
+    }
+}
+
+sf::Vector2f Entity::getCenter() const
+{
+    if (auto *collision = getComponent<CollisionComponent>())
+        return collision->getCenter();
+    return m_position;
+}
+
+void Entity::updateAnimationAndVisual(float dt)
+{
+    // Update animation state
+    if (auto *anim = getComponent<AnimationComponent>()) {
+        anim->update(dt);
+
+        // Apply animation frame to visual
+        if (auto *visual = getComponent<VisualComponent>()) {
+            visual->setTextureRect(anim->getCurrentFrame());
+        }
+    }
+
+    // Apply direction flipping to visual
+    if (auto *visual = getComponent<VisualComponent>()) {
+        if (auto *direction = getComponent<DirectionComponent>()) {
+            sf::Vector2f scale = visual->getScale();
+            float absScaleX = std::abs(scale.x);
+
+            if (direction->isFacingLeft()) {
+                if (scale.x > 0)
+                    visual->setScale(-absScaleX, scale.y);
+            }
+            else {
+                if (scale.x < 0)
+                    visual->setScale(absScaleX, scale.y);
+            }
+        }
     }
 }

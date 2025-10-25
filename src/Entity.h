@@ -11,21 +11,26 @@ class Entity : public ComponentContainer
 {
 public:
     Entity(Game *pGame, EntityType type, const sf::Vector2f &position);
-    ~Entity() = default;
+    virtual ~Entity() = default;
 
-    void update(float dt);
-    void draw(sf::RenderTarget &target, sf::RenderStates states) const;
+    virtual void update(float dt);
+    virtual void draw(sf::RenderTarget &target, sf::RenderStates states) const;
+
+    void updateAnimationAndVisual(float dt);
 
     sf::Vector2f getPosition() const { return m_position; }
-    void setPosition(const sf::Vector2f &pos);
+    virtual void setPosition(const sf::Vector2f &pos);
+    sf::Vector2f getCenter() const;
 
     EntityType getType() const { return m_type; }
     void setColliding(bool colliding);
 
-    void handleInput(float deltaTime, const InputState &input);
+    Game *getGame() const { return m_pGame; }
 
-private:
-    void initComponents();
+    virtual void handleInput(float deltaTime, const InputState &input);
+
+protected:
+    virtual void initComponents();
 
     Game *m_pGame;
     EntityType m_type;
