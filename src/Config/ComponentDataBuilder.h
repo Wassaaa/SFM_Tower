@@ -174,9 +174,14 @@ public:
         m_radius = radius;
         return *this;
     }
+    WeaponDataBuilder &setBehavior(WeaponBehavior behavior)
+    {
+        m_behavior = behavior;
+        return *this;
+    }
     WeaponComponentData build() const
     {
-        return {m_baseDamage, m_basePiercing, m_maxHits, m_lifetime, m_radius};
+        return {m_baseDamage, m_basePiercing, m_maxHits, m_lifetime, m_radius, m_behavior};
     }
 
 private:
@@ -185,6 +190,7 @@ private:
     int m_maxHits{1};
     float m_lifetime{0.f};
     float m_radius{0.f};
+    WeaponBehavior m_behavior{WeaponBehavior::None};
 };
 
 class KinematicsDataBuilder

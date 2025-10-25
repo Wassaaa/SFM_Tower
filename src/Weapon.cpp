@@ -41,16 +41,15 @@ void Weapon::initComponents()
 
 void Weapon::update(float dt)
 {
-    if (auto weapon = getComponent<WeaponComponent>()) {
-        weapon->update(dt);
+    auto *weaponComp = getComponent<WeaponComponent>();
+    if (weaponComp) {
+        weaponComp->update(dt);
     }
 
-    sf::Vector2f ownerPos = m_owner->getPosition();
-
-    auto *kinematics = getComponent<KinematicsComponent>();
-    if (kinematics) {
-        // Update orbit center for orbital/homing behaviors
-        m_orbitCenter = ownerPos;
+    // If weapon has kinematics, let it control all movement
+    if (auto *kinematics = getComponent<KinematicsComponent>()) {
+        // Set orbit center to owner's center for orbital/homing behaviors
+        m_orbitCenter = m_owner->getCenter();
         kinematics->setTargetPoint(&m_orbitCenter);
 
         auto *visual = getComponent<VisualComponent>();
@@ -59,9 +58,9 @@ void Weapon::update(float dt)
             kinematics->update(dt, *visual, *collision);
         }
     }
-    else {
-        // No kinematics, just follow owner position
-        setPosition(ownerPos);
+    // No kinematics: check if weapon should follow owner
+    else if (weaponComp && weaponComp->getBehavior() == WeaponBehavior::FollowOwner) {
+        setPosition(m_owner->getPosition());
     }
 
     updateAnimationAndVisual(dt);

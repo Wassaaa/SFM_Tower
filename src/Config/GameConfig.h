@@ -17,6 +17,13 @@ enum class KinematicsBehavior : uint32_t
     Pulsing = 1 << 6     // Scale up/down repeatedly
 };
 
+// Weapon behavior types
+enum class WeaponBehavior : uint32_t
+{
+    None = 0,
+    FollowOwner = 1 << 0 // Stay at owner position (attached)
+};
+
 // Enable bitwise operations
 inline KinematicsBehavior operator|(KinematicsBehavior a, KinematicsBehavior b)
 {
@@ -92,6 +99,7 @@ struct WeaponComponentData
     int maxHits;    // -1 for unlimited (beams)
     float lifetime; // 0 for infinite
     float radius;
+    WeaponBehavior behavior;
 };
 
 struct KinematicsComponentData

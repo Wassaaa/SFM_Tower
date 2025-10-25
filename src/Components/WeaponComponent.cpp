@@ -10,6 +10,7 @@ WeaponComponent::WeaponComponent(const WeaponComponentData &data)
     , lifetime(data.lifetime)
     , currentLifetime(0.f)
     , radius(data.radius)
+    , behavior(data.behavior)
 {}
 
 void WeaponComponent::update(float dt)

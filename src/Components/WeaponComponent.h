@@ -18,6 +18,7 @@ public:
     float getRadius() const { return radius; }
     int getCurrentHits() const { return currentHits; }
     int getMaxHits() const { return maxHits; }
+    WeaponBehavior getBehavior() const { return behavior; }
 
     // Upgrade methods
     void addDamage(float amount);
@@ -44,4 +45,7 @@ private:
 
     // Effects
     float radius; // Collision/damage radius
+
+    // Behavior
+    WeaponBehavior behavior;
 };

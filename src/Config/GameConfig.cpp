@@ -65,6 +65,7 @@ namespace Config {
                            .setMaxHits(1)
                            .setLifetime(5.f)
                            .setRadius(16.f)
+                           .setBehavior(WeaponBehavior::None)
                            .build())
             .setKinematics(KinematicsDataBuilder()
                                .setAngularVelocity(720.f)
