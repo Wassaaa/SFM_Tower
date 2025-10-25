@@ -122,5 +122,6 @@ namespace Config {
     extern const EntityConfig TOWER;
     extern const EntityConfig LASER_WEAPON;
     extern const EntityConfig VAMPIRE;
+    extern const EntityConfig TEST_BOX;
     extern const std::unordered_map<EntityType, const EntityConfig &> ENTITY_CONFIGS;
 } // namespace Config

@@ -24,5 +24,6 @@ enum class EntityType
     LASER_WEAPON,
     EXPLOSION_WEAPON,
     CONE_WEAPON,
-    VAMPIRE
+    VAMPIRE,
+    TEST_BOX
 };

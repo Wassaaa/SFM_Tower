@@ -3,13 +3,18 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
 #include <iostream>
+#include <random>
 
 #include "ResourceManager.h"
 #include "Tower.h"
+#include "Entity.h"
+#include "Components/CollisionComponent.h"
+#include "Components/KinematicsComponent.h"
 
 Game::Game()
     : m_state(GameState::ACTIVE)
     , m_pClock(std::make_unique<sf::Clock>())
+    , m_pPlayerEntity(nullptr)
 {
     // Create a tower in the center of the screen
     sf::Vector2f towerPosition(Constants::SCREEN_WIDTH / 2.f, Constants::SCREEN_HEIGHT / 2.f);
@@ -33,6 +38,22 @@ bool Game::initialise()
     // Add a weapon to the tower for testing
     m_pTower->addWeapon(EntityType::LASER_WEAPON);
 
+    // Create test entities - player controlled box
+    auto playerEntity =
+        std::make_unique<Entity>(this, EntityType::TEST_BOX, sf::Vector2f(200.f, 200.f));
+    m_pPlayerEntity = playerEntity.get();
+    m_entities.push_back(std::move(playerEntity));
+
+    // Create static test boxes with random positions
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<> posDist(100.f, 700.f);
+
+    for (int i = 0; i < 5; i++) {
+        m_entities.push_back(std::make_unique<Entity>(this, EntityType::TEST_BOX,
+                                                      sf::Vector2f(posDist(gen), posDist(gen))));
+    }
+
     return true;
 }
 
@@ -44,6 +65,40 @@ void Game::update(float deltaTime)
     switch (m_state) {
     case GameState::ACTIVE: {
         m_pTower->update(deltaTime);
+
+        // Handle player entity input
+        if (m_pPlayerEntity) {
+            m_pPlayerEntity->handleInput(deltaTime, m_keyW, m_keyA, m_keyS, m_keyD);
+        }
+
+        // Update all entities
+        for (auto &entity : m_entities) {
+            entity->update(deltaTime);
+        }
+
+        // Check collisions between all entities
+        for (size_t i = 0; i < m_entities.size(); i++) {
+            bool isColliding = false;
+            auto *collision1 = m_entities[i]->getComponent<CollisionComponent>();
+            if (!collision1)
+                continue;
+
+            for (size_t j = 0; j < m_entities.size(); j++) {
+                if (i == j)
+                    continue;
+
+                auto *collision2 = m_entities[j]->getComponent<CollisionComponent>();
+                if (!collision2)
+                    continue;
+
+                if (collision1->intersects(*collision2)) {
+                    isColliding = true;
+                    break;
+                }
+            }
+
+            m_entities[i]->setColliding(isColliding);
+        }
     } break;
 
     case GameState::WAITING:
@@ -53,18 +108,53 @@ void Game::update(float deltaTime)
 
 void Game::draw(sf::RenderTarget &target, sf::RenderStates states) const
 {
+    // Draw entities
+    for (const auto &entity : m_entities) {
+        entity->draw(target, states);
+    }
+
     // Draw tower
     m_pTower->draw(target, states);
 }
 
 void Game::onKeyPressed(sf::Keyboard::Key key)
 {
-    // Handle key presses if needed
+    switch (key) {
+    case sf::Keyboard::W:
+        m_keyW = true;
+        break;
+    case sf::Keyboard::A:
+        m_keyA = true;
+        break;
+    case sf::Keyboard::S:
+        m_keyS = true;
+        break;
+    case sf::Keyboard::D:
+        m_keyD = true;
+        break;
+    default:
+        break;
+    }
 }
 
 void Game::onKeyReleased(sf::Keyboard::Key key)
 {
-    // Handle key releases if needed
+    switch (key) {
+    case sf::Keyboard::W:
+        m_keyW = false;
+        break;
+    case sf::Keyboard::A:
+        m_keyA = false;
+        break;
+    case sf::Keyboard::S:
+        m_keyS = false;
+        break;
+    case sf::Keyboard::D:
+        m_keyD = false;
+        break;
+    default:
+        break;
+    }
 }
 
 Tower *Game::getTower() const

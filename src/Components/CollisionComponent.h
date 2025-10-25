@@ -24,6 +24,8 @@ public:
     virtual const char *getName() const override { return "CollisionComponent"; }
     sf::Vector2f getCenter() const;
     CollisionShape getType() const { return m_type; }
+    const CollisionComponentData &getData() const { return m_data; }
+    void setColliding(bool colliding) { m_isColliding = colliding; }
 
 private:
     // members
@@ -32,6 +34,7 @@ private:
     float m_radius; // only for circles
     const CollisionComponentData &m_data;
     bool m_debugDraw{false};
+    bool m_isColliding{false};
 
     // member functions
     void applyTransforms();

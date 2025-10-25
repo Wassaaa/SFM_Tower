@@ -22,11 +22,14 @@ void CollisionComponent::draw(sf::RenderTarget &target, sf::RenderStates states)
 
     states.transform *= getTransform();
 
+    // Set outline color based on collision state
+    sf::Color outlineColor = m_isColliding ? sf::Color::Red : sf::Color::White;
+
     if (m_type == CollisionShape::Circle) {
         sf::CircleShape circle(m_radius);
         circle.setOrigin(m_radius, m_radius);
         circle.setFillColor(m_data.debugColor);
-        circle.setOutlineColor(sf::Color::White);
+        circle.setOutlineColor(outlineColor);
         circle.setOutlineThickness(1.0f);
         target.draw(circle, states);
     }
@@ -37,7 +40,7 @@ void CollisionComponent::draw(sf::RenderTarget &target, sf::RenderStates states)
             polygon.setPoint(i, m_localPoints[i]);
         }
         polygon.setFillColor(m_data.debugColor);
-        polygon.setOutlineColor(sf::Color::White);
+        polygon.setOutlineColor(outlineColor);
         polygon.setOutlineThickness(1.0f);
         target.draw(polygon, states);
     }
