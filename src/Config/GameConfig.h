@@ -33,6 +33,21 @@ inline bool hasFlag(KinematicsBehavior value, KinematicsBehavior flag)
     return (static_cast<uint32_t>(value) & static_cast<uint32_t>(flag)) != 0;
 }
 
+// Collision shape types
+enum class CollisionShape
+{
+    Circle,
+    Polygon
+};
+
+// Collision response data
+struct CollisionResult
+{
+    bool intersects;
+    sf::Vector2f normal; // Direction to push objects apart
+    float depth;         // How deep the intersection is
+};
+
 // Data structures for component configurations
 struct VisualComponentData
 {
@@ -45,7 +60,15 @@ struct VisualComponentData
 
 struct CollisionComponentData
 {
-    sf::Vector2f size;
+    CollisionShape type;
+
+    // For circles:
+    float radius; // Only used if type == Circle
+
+    // For polygons:
+    std::vector<sf::Vector2f> points; // Local space points
+
+    // Transform data
     sf::Vector2f scale;
     sf::Vector2f origin;
     sf::Vector2f offset;

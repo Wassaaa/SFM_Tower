@@ -1,30 +1,46 @@
 #include "CollisionComponent.h"
 #include "../Constants.h"
 #include "../MathUtils.h"
+#include <cmath>
+#include <limits>
 
 CollisionComponent::CollisionComponent(const CollisionComponentData &data)
     : m_data(data)
+    , m_type(data.type)
+    , m_radius(data.radius)
+    , m_localPoints(data.points)
 {
-    initShape();
     applyTransforms();
     this->setDebugDraw(Constants::DEBUG_DRAW);
 }
 
 void CollisionComponent::draw(sf::RenderTarget &target, sf::RenderStates states) const
 {
-    if (m_debugDraw) {
-        states.transform *= getTransform();
-        target.draw(m_shape, states);
+    if (!m_debugDraw) {
+        return;
     }
-}
 
-void CollisionComponent::initShape()
-{
-    m_shape.setSize(m_data.size);
-    m_shape.setFillColor(sf::Color(m_data.debugColor.r, m_data.debugColor.g, m_data.debugColor.b,
-                                   m_data.debugColor.a / 2));
-    m_shape.setOutlineColor(m_data.debugColor);
-    m_shape.setOutlineThickness(1.0f);
+    states.transform *= getTransform();
+
+    if (m_type == CollisionShape::Circle) {
+        sf::CircleShape circle(m_radius);
+        circle.setOrigin(m_radius, m_radius);
+        circle.setFillColor(m_data.debugColor);
+        circle.setOutlineColor(sf::Color::White);
+        circle.setOutlineThickness(1.0f);
+        target.draw(circle, states);
+    }
+    else {
+        sf::ConvexShape polygon;
+        polygon.setPointCount(m_localPoints.size());
+        for (size_t i = 0; i < m_localPoints.size(); i++) {
+            polygon.setPoint(i, m_localPoints[i]);
+        }
+        polygon.setFillColor(m_data.debugColor);
+        polygon.setOutlineColor(sf::Color::White);
+        polygon.setOutlineThickness(1.0f);
+        target.draw(polygon, states);
+    }
 }
 
 void CollisionComponent::applyTransforms()
@@ -35,49 +51,224 @@ void CollisionComponent::applyTransforms()
     setRotation(m_data.rotation);
 }
 
-bool CollisionComponent::intersectsOBB(const CollisionComponent &other) const
+sf::Vector2f CollisionComponent::getCenter() const
 {
-    std::array<sf::Vector2f, 4> corners1, corners2;
-    std::array<sf::Vector2f, 4> axes;
-
-    getWorldCorners(corners1);
-    other.getWorldCorners(corners2);
-
-    axes[0] = VecNormalized(corners1[1] - corners1[0]);
-    axes[1] = VecNormalized(corners1[3] - corners1[0]);
-    axes[2] = VecNormalized(corners2[1] - corners2[0]);
-    axes[3] = VecNormalized(corners2[3] - corners2[0]);
-
-    for (auto axis : axes) {
-        float min1, max1, min2, max2;
-        projectOntoAxis(corners1, axis, min1, max1);
-        projectOntoAxis(corners2, axis, min2, max2);
-        if (max1 < min2 || max2 < min1)
-            return false;
-    }
-    return true;
+    return getTransform().transformPoint({0.f, 0.f});
 }
 
-void CollisionComponent::getWorldCorners(std::array<sf::Vector2f, 4> &corners) const
+std::vector<sf::Vector2f> CollisionComponent::getWorldPoints() const
 {
+    std::vector<sf::Vector2f> worldPoints;
+    worldPoints.reserve(m_localPoints.size());
     sf::Transform transform = getTransform();
-    sf::FloatRect local = m_shape.getLocalBounds();
 
-    corners[0] = transform.transformPoint(local.left, local.top);
-    corners[1] = transform.transformPoint(local.left + local.width, local.top);
-    corners[2] = transform.transformPoint(local.left + local.width, local.top + local.height);
-    corners[3] = transform.transformPoint(local.left, local.top + local.height);
+    for (const auto &point : m_localPoints) {
+        worldPoints.push_back(transform.transformPoint(point));
+    }
+    return worldPoints;
 }
 
-void CollisionComponent::projectOntoAxis(const std::array<sf::Vector2f, 4> &corners,
+float CollisionComponent::getWorldRadius() const
+{
+    // Account for scale (use average of x and y scale)
+    sf::Vector2f scale = getScale();
+    return m_radius * (scale.x + scale.y) * 0.5f;
+}
+
+bool CollisionComponent::intersects(const CollisionComponent &other) const
+{
+    return checkCollision(other).intersects;
+}
+
+CollisionResult CollisionComponent::checkCollision(const CollisionComponent &other) const
+{
+    // Broad AABB check
+    if (!getBounds().intersects(other.getBounds())) {
+        return {false, {0.f, 0.f}, 0.f};
+    }
+
+    // Narrow check based on shape types
+    if (m_type == CollisionShape::Circle && other.m_type == CollisionShape::Circle) {
+        return circleCircleCollision(other);
+    }
+    else if (m_type == CollisionShape::Circle || other.m_type == CollisionShape::Circle) {
+        // One is circle, one is polygon
+        if (m_type == CollisionShape::Circle) {
+            CollisionResult result = circlePolygonCollision(other);
+            // Flip normal since we're checking from polygon's perspective for now
+            result.normal = -result.normal;
+            return result;
+        }
+        else {
+            return other.circlePolygonCollision(*this);
+        }
+    }
+    else {
+        // Both polygons
+        return polygonPolygonCollision(other);
+    }
+}
+
+CollisionResult CollisionComponent::circleCircleCollision(const CollisionComponent &other) const
+{
+    CollisionResult result = {false, {0.f, 0.f}, 0.f};
+    sf::Vector2f center1 = getCenter();
+    sf::Vector2f center2 = other.getCenter();
+    float radius1 = getWorldRadius();
+    float radius2 = other.getWorldRadius();
+
+    sf::Vector2f diff = center2 - center1;
+    float distSq = VecLengthSquared(diff);
+    float radiusSum = radius1 + radius2;
+
+    if (distSq >= radiusSum * radiusSum) {
+        return result;
+    }
+
+    result.intersects = true;
+    float dist = std::sqrt(distSq);
+    result.depth = radiusSum - dist;
+
+    if (dist > EPSILON)
+        result.normal = diff / dist;
+    else
+        result.normal = sf::Vector2f(1.f, 0.f);
+
+    return result;
+}
+
+CollisionResult CollisionComponent::circlePolygonCollision(const CollisionComponent &other) const
+{
+    CollisionResult result = {false, {0.f, 0.f}, 0.f};
+
+    // Circle is 'this', polygon is 'other'
+    sf::Vector2f circleCenter = getCenter();
+    float radius = getWorldRadius();
+    std::vector<sf::Vector2f> polyPoints = other.getWorldPoints();
+
+    if (polyPoints.empty()) {
+        return result;
+    }
+
+    // Find closest point on polygon to circle center
+    float minDistSq = std::numeric_limits<float>::max();
+    sf::Vector2f closestPoint;
+
+    for (size_t i = 0; i < polyPoints.size(); i++) {
+        sf::Vector2f p1 = polyPoints[i];
+        sf::Vector2f p2 = polyPoints[(i + 1) % polyPoints.size()];
+
+        sf::Vector2f pointOnEdge = ClosestPointOnSegment(circleCenter, p1, p2);
+        float distSq = DistanceSquared(circleCenter, pointOnEdge);
+
+        if (distSq < minDistSq) {
+            minDistSq = distSq;
+            closestPoint = pointOnEdge;
+        }
+    }
+
+    if (minDistSq >= radius * radius) {
+        return result;
+    }
+
+    result.intersects = true;
+    float dist = std::sqrt(minDistSq);
+    result.depth = radius - dist;
+
+    sf::Vector2f diff = circleCenter - closestPoint;
+    if (dist > EPSILON)
+        result.normal = diff / dist;
+    else
+        result.normal = sf::Vector2f(1.f, 0.f);
+
+    return result;
+}
+
+CollisionResult CollisionComponent::polygonPolygonCollision(const CollisionComponent &other) const
+{
+    CollisionResult result = {false, {0.f, 0.f}, 0.f};
+
+    std::vector<sf::Vector2f> points1 = getWorldPoints();
+    std::vector<sf::Vector2f> points2 = other.getWorldPoints();
+
+    if (points1.empty() || points2.empty()) {
+        return result;
+    }
+
+    float minOverlap = std::numeric_limits<float>::max();
+    sf::Vector2f minAxis;
+
+    // Test axes from first polygon
+    for (size_t i = 0; i < points1.size(); i++) {
+        sf::Vector2f p1 = points1[i];
+        sf::Vector2f p2 = points1[(i + 1) % points1.size()];
+        sf::Vector2f edge = p2 - p1;
+        sf::Vector2f axis = VecNormalized(Perpendicular(edge));
+
+        float min1, max1, min2, max2;
+        projectOntoAxis(points1, axis, min1, max1);
+        projectOntoAxis(points2, axis, min2, max2);
+
+        if (max1 < min2 || max2 < min1) {
+            return result; // Separating axis found
+        }
+
+        float overlap = std::min(max1, max2) - std::max(min1, min2);
+        if (overlap < minOverlap) {
+            minOverlap = overlap;
+            minAxis = axis;
+        }
+    }
+
+    // Test axes from second polygon
+    for (size_t i = 0; i < points2.size(); i++) {
+        sf::Vector2f p1 = points2[i];
+        sf::Vector2f p2 = points2[(i + 1) % points2.size()];
+        sf::Vector2f edge = p2 - p1;
+        sf::Vector2f axis = VecNormalized(Perpendicular(edge));
+
+        float min1, max1, min2, max2;
+        projectOntoAxis(points1, axis, min1, max1);
+        projectOntoAxis(points2, axis, min2, max2);
+
+        if (max1 < min2 || max2 < min1) {
+            return result; // Separating axis found
+        }
+
+        float overlap = std::min(max1, max2) - std::max(min1, min2);
+        if (overlap < minOverlap) {
+            minOverlap = overlap;
+            minAxis = axis;
+        }
+    }
+
+    // We have a collision!
+    result.intersects = true;
+    result.depth = minOverlap;
+    result.normal = minAxis;
+
+    // Ensure normal points from this to other
+    sf::Vector2f center1 = getCenter();
+    sf::Vector2f center2 = other.getCenter();
+    if (DotProduct(result.normal, center2 - center1) < 0) {
+        result.normal = -result.normal;
+    }
+
+    return result;
+}
+
+void CollisionComponent::projectOntoAxis(const std::vector<sf::Vector2f> &points,
                                          const sf::Vector2f &axis, float &min, float &max) const
 {
-    // Initialize with first corner's projection
-    min = max = DotProduct(corners[0], axis);
+    if (points.empty()) {
+        min = max = 0.f;
+        return;
+    }
 
-    // Check remaining corners
-    for (size_t i = 1; i < corners.size(); i++) {
-        float projection = DotProduct(corners[i], axis);
+    min = max = DotProduct(points[0], axis);
+
+    for (size_t i = 1; i < points.size(); i++) {
+        float projection = DotProduct(points[i], axis);
         if (projection < min)
             min = projection;
         if (projection > max)
@@ -85,15 +276,29 @@ void CollisionComponent::projectOntoAxis(const std::array<sf::Vector2f, 4> &corn
     }
 }
 
-bool CollisionComponent::intersects(const CollisionComponent &other) const
-{
-    if (getBounds().intersects(other.getBounds())) {
-        return intersectsOBB(other);
-    }
-    return false;
-}
-
 sf::FloatRect CollisionComponent::getBounds() const
 {
-    return getTransform().transformRect(m_shape.getGlobalBounds());
+    if (m_type == CollisionShape::Circle) {
+        sf::Vector2f center = getCenter();
+        float radius = getWorldRadius();
+        return sf::FloatRect(center.x - radius, center.y - radius, radius * 2, radius * 2);
+    }
+    else {
+        std::vector<sf::Vector2f> worldPoints = getWorldPoints();
+        if (worldPoints.empty()) {
+            return sf::FloatRect();
+        }
+
+        float minX = worldPoints[0].x, maxX = worldPoints[0].x;
+        float minY = worldPoints[0].y, maxY = worldPoints[0].y;
+
+        for (const auto &point : worldPoints) {
+            minX = std::min(minX, point.x);
+            maxX = std::max(maxX, point.x);
+            minY = std::min(minY, point.y);
+            maxY = std::max(maxY, point.y);
+        }
+
+        return sf::FloatRect(minX, minY, maxX - minX, maxY - minY);
+    }
 }
