@@ -153,6 +153,7 @@ CollisionResult CollisionComponent::circlePolygonCollision(const CollisionCompon
     // Find closest point on polygon to circle center
     float minDistSq = std::numeric_limits<float>::max();
     sf::Vector2f closestPoint;
+    float radiusSq = radius * radius;
 
     for (size_t i = 0; i < polyPoints.size(); i++) {
         sf::Vector2f p1 = polyPoints[i];
@@ -167,7 +168,7 @@ CollisionResult CollisionComponent::circlePolygonCollision(const CollisionCompon
         }
     }
 
-    if (minDistSq >= radius * radius) {
+    if (minDistSq >= radiusSq) {
         return result;
     }
 
@@ -184,6 +185,38 @@ CollisionResult CollisionComponent::circlePolygonCollision(const CollisionCompon
     return result;
 }
 
+bool CollisionComponent::hasSeparatingAxis(const std::vector<sf::Vector2f> &points1,
+                                           const std::vector<sf::Vector2f> &points2,
+                                           const sf::Vector2f &axis, float &minOverlap,
+                                           sf::Vector2f &minAxis) const
+{
+    float min1, max1, min2, max2;
+    projectOntoAxis(points1, axis, min1, max1);
+    projectOntoAxis(points2, axis, min2, max2);
+
+    // Check for separation
+    if (max1 < min2 || max2 < min1) {
+        return true; // no collision
+    }
+
+    float overlap = std::min(max1, max2) - std::max(min1, min2);
+    // Square overlap for avoiding sqrt
+    overlap *= overlap;
+
+    float axisLengthSq = VecLengthSquared(axis);
+    if (axisLengthSq > EPSILON) {
+        overlap = overlap / axisLengthSq;
+    }
+
+    // Track minimum overlap / collision depth
+    if (overlap < minOverlap) {
+        minOverlap = overlap;
+        minAxis = axis;
+    }
+
+    return false;
+}
+
 CollisionResult CollisionComponent::polygonPolygonCollision(const CollisionComponent &other) const
 {
     CollisionResult result = {false, {0.f, 0.f}, 0.f};
@@ -198,54 +231,34 @@ CollisionResult CollisionComponent::polygonPolygonCollision(const CollisionCompo
     float minOverlap = std::numeric_limits<float>::max();
     sf::Vector2f minAxis;
 
-    // Test axes from first polygon
+    // Test axes from first polygon's edges
     for (size_t i = 0; i < points1.size(); i++) {
         sf::Vector2f p1 = points1[i];
         sf::Vector2f p2 = points1[(i + 1) % points1.size()];
         sf::Vector2f edge = p2 - p1;
-        sf::Vector2f axis = VecNormalized(Perpendicular(edge));
+        sf::Vector2f axis = Perpendicular(edge);
 
-        float min1, max1, min2, max2;
-        projectOntoAxis(points1, axis, min1, max1);
-        projectOntoAxis(points2, axis, min2, max2);
-
-        if (max1 < min2 || max2 < min1) {
-            return result; // Separating axis found
-        }
-
-        float overlap = std::min(max1, max2) - std::max(min1, min2);
-        if (overlap < minOverlap) {
-            minOverlap = overlap;
-            minAxis = axis;
+        if (hasSeparatingAxis(points1, points2, axis, minOverlap, minAxis)) {
+            return result;
         }
     }
 
-    // Test axes from second polygon
+    // Test axes from second polygon's edges
     for (size_t i = 0; i < points2.size(); i++) {
         sf::Vector2f p1 = points2[i];
         sf::Vector2f p2 = points2[(i + 1) % points2.size()];
         sf::Vector2f edge = p2 - p1;
-        sf::Vector2f axis = VecNormalized(Perpendicular(edge));
+        sf::Vector2f axis = Perpendicular(edge);
 
-        float min1, max1, min2, max2;
-        projectOntoAxis(points1, axis, min1, max1);
-        projectOntoAxis(points2, axis, min2, max2);
-
-        if (max1 < min2 || max2 < min1) {
-            return result; // Separating axis found
-        }
-
-        float overlap = std::min(max1, max2) - std::max(min1, min2);
-        if (overlap < minOverlap) {
-            minOverlap = overlap;
-            minAxis = axis;
+        if (hasSeparatingAxis(points1, points2, axis, minOverlap, minAxis)) {
+            return result;
         }
     }
 
-    // We have a collision!
+    // Collision, sqrt depth and normalize normal only in the end here
     result.intersects = true;
-    result.depth = minOverlap;
-    result.normal = minAxis;
+    result.depth = std::sqrt(minOverlap);
+    result.normal = VecNormalized(minAxis);
 
     // Ensure normal points from this to other
     sf::Vector2f center1 = getCenter();
@@ -260,11 +273,6 @@ CollisionResult CollisionComponent::polygonPolygonCollision(const CollisionCompo
 void CollisionComponent::projectOntoAxis(const std::vector<sf::Vector2f> &points,
                                          const sf::Vector2f &axis, float &min, float &max) const
 {
-    if (points.empty()) {
-        min = max = 0.f;
-        return;
-    }
-
     min = max = DotProduct(points[0], axis);
 
     for (size_t i = 1; i < points.size(); i++) {

@@ -46,4 +46,7 @@ private:
     float getWorldRadius() const;
     void projectOntoAxis(const std::vector<sf::Vector2f> &points, const sf::Vector2f &axis,
                          float &min, float &max) const;
+    bool hasSeparatingAxis(const std::vector<sf::Vector2f> &points1,
+                           const std::vector<sf::Vector2f> &points2, const sf::Vector2f &axis,
+                           float &minOverlap, sf::Vector2f &minAxis) const;
 };
