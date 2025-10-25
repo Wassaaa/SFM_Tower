@@ -17,20 +17,11 @@ public:
     void loadTexture();
 
     // setters
-    void setTextureRect(const sf::IntRect &rect)
-    {
-        m_sprite.setTextureRect(rect);
-    }
+    void setTextureRect(const sf::IntRect &rect) { m_sprite.setTextureRect(rect); }
 
     // getters
-    const sf::Sprite &getSprite() const
-    {
-        return m_sprite;
-    }
-    virtual const char *getName() const override
-    {
-        return "VisualComponent";
-    }
+    const sf::Sprite &getSprite() const { return m_sprite; }
+    virtual const char *getName() const override { return "VisualComponent"; }
     const sf::Vector2f getCenter() const
     {
         sf::FloatRect bounds = m_sprite.getGlobalBounds();

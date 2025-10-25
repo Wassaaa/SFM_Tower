@@ -17,10 +17,7 @@ public:
     void addSpeed();
     void addRange();
 
-    EntityType getType() const
-    {
-        return m_type;
-    }
+    EntityType getType() const { return m_type; }
 
 private:
     void initComponents();

@@ -22,8 +22,5 @@ public:
 
 private:
     std::unordered_map<EntityType, EntityData> entityData;
-    EntityManager()
-    {
-        this->loadEntityData();
-    }
+    EntityManager() { this->loadEntityData(); }
 };

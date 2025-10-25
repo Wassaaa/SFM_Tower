@@ -1,13 +1,8 @@
 #include "AnimationComponent.h"
 
-AnimationComponent::AnimationComponent(VisualComponent &visual)
-    : m_visual(visual)
-{}
-
 void AnimationComponent::addAnimation(EntityState state, const AnimationInfo &animInfo)
 {
     animations.try_emplace(state, animInfo.frameDuration, animInfo.loop);
-    animationFlipX[state] = animInfo.flipX;
     for (size_t i = 0; i < animInfo.frameCount; i++) {
         sf::IntRect frame(animInfo.startPos.x + i * animInfo.frameSize.x,
                           animInfo.startPos.y * animInfo.frameSize.y, animInfo.frameSize.x,
@@ -39,21 +34,6 @@ void AnimationComponent::playAnimation(EntityState newAnimation)
 
     currentAnimation = newAnimation;
     animations[newAnimation].play();
-
-    // Apply horizontal flip if needed
-    // Special case: IDLE preserves the current facing direction
-    sf::Vector2f currentScale = m_visual.getScale();
-    if (newAnimation != EntityState::IDLE) {
-        bool shouldFlip = animationFlipX[newAnimation];
-        if (shouldFlip && currentScale.x > 0) {
-            m_visual.setScale(-currentScale.x, currentScale.y);
-        }
-        else if (!shouldFlip && currentScale.x < 0) {
-            m_visual.setScale(-currentScale.x, currentScale.y);
-        }
-    }
-
-    m_visual.setTextureRect(animations[newAnimation].getCurrentFrame());
 }
 
 void AnimationComponent::update(float dt)
@@ -62,9 +42,10 @@ void AnimationComponent::update(float dt)
         playDefaultAnimation();
         return;
     }
-    if (animations[currentAnimation].update(dt))
-        m_visual.setTextureRect(animations[currentAnimation].getCurrentFrame());
-    else if (!animations[currentAnimation].isPlaying() && !animations[currentAnimation].isLooping())
+    // Just update animation state, visual update happens in draw()
+    animations[currentAnimation].update(dt);
+
+    if (!animations[currentAnimation].isPlaying() && !animations[currentAnimation].isLooping())
         onAnimationComplete();
 }
 
@@ -83,4 +64,13 @@ void AnimationComponent::playDefaultAnimation()
 {
     if (defaultAnimation != EntityState::NOTHING)
         playAnimation(defaultAnimation);
+}
+
+sf::IntRect AnimationComponent::getCurrentFrame() const
+{
+    if (currentAnimation != EntityState::NOTHING &&
+        animations.find(currentAnimation) != animations.end()) {
+        return animations.at(currentAnimation).getCurrentFrame();
+    }
+    return sf::IntRect(0, 0, 0, 0);
 }

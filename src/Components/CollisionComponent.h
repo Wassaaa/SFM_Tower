@@ -17,18 +17,9 @@ public:
     sf::FloatRect getBounds() const;
 
     // getters and setters
-    void setDebugDraw(bool enabled)
-    {
-        m_debugDraw = enabled;
-    }
-    bool isDebugDrawEnabled() const
-    {
-        return m_debugDraw;
-    }
-    virtual const char *getName() const override
-    {
-        return "CollisionComponent";
-    }
+    void setDebugDraw(bool enabled) { m_debugDraw = enabled; }
+    bool isDebugDrawEnabled() const { return m_debugDraw; }
+    virtual const char *getName() const override { return "CollisionComponent"; }
     sf::Vector2f getCenter() const
     {
         sf::FloatRect bounds = m_shape.getGlobalBounds();

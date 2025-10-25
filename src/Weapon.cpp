@@ -5,6 +5,8 @@
 #include "Components/AnimationComponent.h"
 #include "Components/WeaponComponent.h"
 #include "Components/KinematicsComponent.h"
+#include "Components/DirectionComponent.h"
+#include "RenderSystem.h"
 
 Weapon::Weapon(EntityType type)
     : m_type(type)
@@ -25,12 +27,12 @@ void Weapon::initComponents()
         addComponent<WeaponComponent>(*weapon);
     if (auto *kinematics = entityData.getComponent<KinematicsComponent>())
         addComponent<KinematicsComponent>(*kinematics);
-    
-    // Add animations directly from config
+
+    addComponent<DirectionComponent>(FacingDirection::RIGHT);
+
     if (!config.animations.empty()) {
-        auto &animComponent = addComponent<AnimationComponent>(*getComponent<VisualComponent>());
-        for (const auto &[state, info] : config.animations)
-            animComponent.addAnimation(state, info);
+        auto &animComponent = addComponent<AnimationComponent>();
+        for (const auto &[state, info] : config.animations) animComponent.addAnimation(state, info);
     }
 }
 
@@ -53,22 +55,31 @@ void Weapon::update(float dt, sf::Vector2f ownerPos)
         }
         // Update orbit center for orbital/homing behaviors
         m_orbitCenter = ownerPos;
+
         kinematics->setTargetPoint(&m_orbitCenter);
-        
-        // KinematicsComponent handles all transforms (position, rotation, scale)
         kinematics->update(dt, *visual, *collision);
     }
     else if (visual && collision) {
-        // Fallback for weapons without kinematics - just stay attached to owner
         visual->setPosition(ownerPos);
         collision->setPosition(ownerPos);
     }
-}
 
+    if (auto *anim = getComponent<AnimationComponent>()) {
+        anim->update(dt);
+    }
+
+    // Apply animation frame and direction to visual (non-const context)
+    if (visual) {
+        RenderSystem::updateVisual(*visual, getComponent<AnimationComponent>(),
+                                   getComponent<DirectionComponent>());
+    }
+}
 void Weapon::draw(sf::RenderTarget &target, sf::RenderStates states) const
 {
-    if (auto visual = getComponent<VisualComponent>())
+    // Just draw - visual already updated in update()
+    if (auto *visual = getComponent<VisualComponent>()) {
         visual->draw(target, states);
-    if (auto collision = getComponent<CollisionComponent>())
+    }
+    if (auto *collision = getComponent<CollisionComponent>())
         collision->draw(target, states);
 }

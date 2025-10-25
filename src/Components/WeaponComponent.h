@@ -9,36 +9,15 @@ public:
     ~WeaponComponent() = default;
 
     void update(float dt);
-    virtual const char *getName() const override
-    {
-        return "WeaponComponent";
-    }
+    virtual const char *getName() const override { return "WeaponComponent"; }
 
     // Getters
-    float getDamage() const
-    {
-        return currentDamage;
-    }
-    float getLifetime() const
-    {
-        return currentLifetime;
-    }
-    float getPiercing() const
-    {
-        return piercing;
-    }
-    float getRadius() const
-    {
-        return radius;
-    }
-    int getCurrentHits() const
-    {
-        return currentHits;
-    }
-    int getMaxHits() const
-    {
-        return maxHits;
-    }
+    float getDamage() const { return currentDamage; }
+    float getLifetime() const { return currentLifetime; }
+    float getPiercing() const { return piercing; }
+    float getRadius() const { return radius; }
+    int getCurrentHits() const { return currentHits; }
+    int getMaxHits() const { return maxHits; }
 
     // Upgrade methods
     void addDamage(float amount);

@@ -6,6 +6,8 @@
 #include "Components/VisualComponent.h"
 #include "Components/CollisionComponent.h"
 #include "Components/AnimationComponent.h"
+#include "Components/DirectionComponent.h"
+#include "RenderSystem.h"
 
 Tower::Tower(Game *pGame, const sf::Vector2f &position)
     : m_pGame(pGame)
@@ -30,12 +32,12 @@ void Tower::initComponents()
         addComponent<VisualComponent>(*visual);
     if (auto *collision = entityData.getComponent<CollisionComponent>())
         addComponent<CollisionComponent>(*collision);
-    
-    // Add animations directly from config
+
+    addComponent<DirectionComponent>(FacingDirection::RIGHT);
+
     if (!config.animations.empty()) {
-        auto &animComponent = addComponent<AnimationComponent>(*getComponent<VisualComponent>());
-        for (const auto &[state, info] : config.animations)
-            animComponent.addAnimation(state, info);
+        auto &animComponent = addComponent<AnimationComponent>();
+        for (const auto &[state, info] : config.animations) animComponent.addAnimation(state, info);
     }
 
     // Set position for visual and collision components
@@ -49,6 +51,11 @@ void Tower::update(float &dt)
 {
     updateAnimation(dt);
 
+    if (auto *visual = getComponent<VisualComponent>()) {
+        RenderSystem::updateVisual(*visual, getComponent<AnimationComponent>(),
+                                   getComponent<DirectionComponent>());
+    }
+
     // Update weapons with tower position
     for (auto &weapon : weapons) {
         weapon->update(dt, m_position);
@@ -58,7 +65,6 @@ void Tower::update(float &dt)
 void Tower::updateAnimation(float &dt)
 {
     if (auto *anim = getComponent<AnimationComponent>()) {
-        // Towers are stationary, so we just keep them in IDLE state
         if (currentState != EntityState::IDLE) {
             currentState = EntityState::IDLE;
             anim->playAnimation(currentState);
@@ -69,16 +75,14 @@ void Tower::updateAnimation(float &dt)
 
 void Tower::draw(sf::RenderTarget &target, sf::RenderStates states) const
 {
-    // Draw visual component
-    if (auto *visual = getComponent<VisualComponent>())
+    if (auto *visual = getComponent<VisualComponent>()) {
         target.draw(*visual, states);
+    }
 
-    // Draw collision debug if enabled
     if (auto *collision = getComponent<CollisionComponent>()) {
         target.draw(*collision, states);
     }
 
-    // Draw weapons
     for (const auto &weapon : weapons) {
         weapon->draw(target, states);
     }

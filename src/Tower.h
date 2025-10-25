@@ -22,10 +22,7 @@ public:
 
     // weapons
     void addWeapon(EntityType weaponType);
-    std::vector<std::unique_ptr<Weapon>> &getWeapons()
-    {
-        return weapons;
-    }
+    std::vector<std::unique_ptr<Weapon>> &getWeapons() { return weapons; }
 
     // Position/Transform getters
     sf::Vector2f getPosition() const;

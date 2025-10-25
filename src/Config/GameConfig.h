@@ -60,7 +60,6 @@ struct AnimationInfo
     size_t frameCount;
     sf::Time frameDuration;
     bool loop;
-    bool flipX;
 };
 
 struct WeaponComponentData

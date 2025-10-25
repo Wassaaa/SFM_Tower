@@ -12,46 +12,19 @@ public:
     void update(float dt, sf::Transformable &visualTransform,
                 sf::Transformable &collisionTransform);
 
-    virtual const char *getName() const override
-    {
-        return "KinematicsComponent";
-    }
+    virtual const char *getName() const override { return "KinematicsComponent"; }
 
     // Getters
-    sf::Vector2f getVelocity() const
-    {
-        return velocity;
-    }
-    sf::Vector2f getAcceleration() const
-    {
-        return acceleration;
-    }
-    float getAngularVelocity() const
-    {
-        return angularVelocity;
-    }
-    KinematicsBehavior getBehavior() const
-    {
-        return behavior;
-    }
+    sf::Vector2f getVelocity() const { return velocity; }
+    sf::Vector2f getAcceleration() const { return acceleration; }
+    float getAngularVelocity() const { return angularVelocity; }
+    KinematicsBehavior getBehavior() const { return behavior; }
 
     // Setters
-    void setVelocity(const sf::Vector2f &vel)
-    {
-        velocity = vel;
-    }
-    void setAcceleration(const sf::Vector2f &accel)
-    {
-        acceleration = accel;
-    }
-    void setAngularVelocity(float angVel)
-    {
-        angularVelocity = angVel;
-    }
-    void setTargetPoint(sf::Vector2f *target)
-    {
-        targetPoint = target;
-    }
+    void setVelocity(const sf::Vector2f &vel) { velocity = vel; }
+    void setAcceleration(const sf::Vector2f &accel) { acceleration = accel; }
+    void setAngularVelocity(float angVel) { angularVelocity = angVel; }
+    void setTargetPoint(sf::Vector2f *target) { targetPoint = target; }
 
 private:
     void updateHoming(float dt, sf::Transformable &transform);
