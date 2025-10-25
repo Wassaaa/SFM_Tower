@@ -147,3 +147,10 @@ void Entity::updateAnimationAndVisual(float dt)
         }
     }
 }
+
+void Entity::resolveCollision(const sf::Vector2f &pushVector)
+{
+    // Simple collision response - just push the entity away
+    m_position += pushVector;
+    setPosition(m_position);
+}

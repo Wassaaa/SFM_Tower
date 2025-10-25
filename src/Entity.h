@@ -27,6 +27,8 @@ public:
 
     Game *getGame() const { return m_pGame; }
 
+    void resolveCollision(const sf::Vector2f &pushVector);
+
     virtual void handleInput(float deltaTime, const InputState &input);
 
 protected:

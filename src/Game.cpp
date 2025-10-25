@@ -75,27 +75,41 @@ void Game::update(float deltaTime)
         }
 
         // Check collisions between all entities
+        // Track which entities are colliding this frame
+        std::vector<bool> isColliding(m_entities.size(), false);
+
         for (size_t i = 0; i < m_entities.size(); i++) {
-            bool isColliding = false;
             auto *collision1 = m_entities[i]->getComponent<CollisionComponent>();
             if (!collision1)
                 continue;
 
-            for (size_t j = 0; j < m_entities.size(); j++) {
-                if (i == j)
-                    continue;
-
+            for (size_t j = i + 1; j < m_entities.size(); j++) {
                 auto *collision2 = m_entities[j]->getComponent<CollisionComponent>();
                 if (!collision2)
                     continue;
 
-                if (collision1->intersects(*collision2)) {
-                    isColliding = true;
-                    break;
+                // Check for collision and get collision data
+                CollisionResult result = collision1->checkCollision(*collision2);
+
+                if (result.intersects) {
+                    // Mark both entities as colliding
+                    isColliding[i] = true;
+                    isColliding[j] = true;
+
+                    const float separationBias = 1.2f;
+                    // For now, push both entities equally (50/50 split)
+                    // The normal points from entity i to entity j
+                    sf::Vector2f separation = result.normal * result.depth * separationBias * 0.5f;
+
+                    m_entities[i]->resolveCollision(-separation);
+                    m_entities[j]->resolveCollision(separation);
                 }
             }
+        }
 
-            m_entities[i]->setColliding(isColliding);
+        // Apply collision states
+        for (size_t i = 0; i < m_entities.size(); i++) {
+            m_entities[i]->setColliding(isColliding[i]);
         }
     } break;
 
