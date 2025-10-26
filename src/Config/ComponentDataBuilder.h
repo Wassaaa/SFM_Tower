@@ -226,31 +226,50 @@ public:
         m_behavior = behavior;
         return *this;
     }
-    KinematicsDataBuilder &setOrbitRadius(float radius)
+    KinematicsDataBuilder &setOrbitRadius(float orbitRadius)
     {
-        m_orbitRadius = radius;
+        m_orbitRadius = orbitRadius;
         return *this;
     }
-    KinematicsDataBuilder &setOrbitAngularVelocity(float angVel)
+    KinematicsDataBuilder &setOrbitAngularVelocity(float orbitAngularVelocity)
     {
-        m_orbitAngularVelocity = angVel;
+        m_orbitAngularVelocity = orbitAngularVelocity;
         return *this;
     }
-    KinematicsDataBuilder &setPulseFrequency(float freq)
+    KinematicsDataBuilder &setPulseFrequency(float pulseFrequency)
     {
-        m_pulseFrequency = freq;
+        m_pulseFrequency = pulseFrequency;
         return *this;
     }
-    KinematicsDataBuilder &setPulseAmplitude(float amp)
+    KinematicsDataBuilder &setPulseAmplitude(float pulseAmplitude)
     {
-        m_pulseAmplitude = amp;
+        m_pulseAmplitude = pulseAmplitude;
+        return *this;
+    }
+    KinematicsDataBuilder &setDrag(float drag)
+    {
+        m_drag = drag;
+        return *this;
+    }
+    KinematicsDataBuilder &setMass(float mass)
+    {
+        m_mass = mass;
         return *this;
     }
     KinematicsComponentData build() const
     {
-        return {m_velocity,       m_acceleration,  m_angularVelocity, m_angularAcceleration,
-                m_scaleVelocity,  m_behavior,      m_orbitRadius,     m_orbitAngularVelocity,
-                m_pulseFrequency, m_pulseAmplitude};
+        return {m_velocity,
+                m_acceleration,
+                m_angularVelocity,
+                m_angularAcceleration,
+                m_scaleVelocity,
+                m_behavior,
+                m_orbitRadius,
+                m_orbitAngularVelocity,
+                m_pulseFrequency,
+                m_pulseAmplitude,
+                m_drag,
+                m_mass};
     }
 
 private:
@@ -259,9 +278,11 @@ private:
     float m_angularVelocity{0.f};
     float m_angularAcceleration{0.f};
     sf::Vector2f m_scaleVelocity{0.f, 0.f};
-    KinematicsBehavior m_behavior{KinematicsBehavior::Linear};
+    KinematicsBehavior m_behavior{KinematicsBehavior::None};
     float m_orbitRadius{0.f};
     float m_orbitAngularVelocity{0.f};
-    float m_pulseFrequency{5.f};  // Default: 5 cycles/sec
-    float m_pulseAmplitude{0.2f}; // Default: 20% size change
+    float m_pulseFrequency{5.f};
+    float m_pulseAmplitude{0.2f};
+    float m_drag{0.f};
+    float m_mass{1.f};
 };

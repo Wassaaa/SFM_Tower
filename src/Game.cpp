@@ -96,7 +96,7 @@ void Game::update(float deltaTime)
                     isColliding[i] = true;
                     isColliding[j] = true;
 
-                    const float separationBias = 1.2f;
+                    const float separationBias = 2.f;
                     // For now, push both entities equally (50/50 split)
                     // The normal points from entity i to entity j
                     sf::Vector2f separation = result.normal * result.depth * separationBias * 0.5f;

@@ -47,7 +47,15 @@ void Entity::update(float dt)
 {
     // Update kinematics if it exists
     if (auto *kinematics = getComponent<KinematicsComponent>()) {
-        m_position += kinematics->getVelocity() * dt;
+        kinematics->update(dt, *this);
+
+        // Sync position from components (visual takes priority, then collision)
+        if (auto *visual = getComponent<VisualComponent>()) {
+            m_position = visual->getPosition();
+        }
+        else if (auto *collision = getComponent<CollisionComponent>()) {
+            m_position = collision->getPosition();
+        }
 
         // Keep within screen bounds
         if (auto *collision = getComponent<CollisionComponent>()) {
@@ -60,9 +68,9 @@ void Entity::update(float dt)
                 m_position.y = halfSize;
             if (m_position.y + halfSize > Constants::SCREEN_HEIGHT)
                 m_position.y = Constants::SCREEN_HEIGHT - halfSize;
-        }
 
-        setPosition(m_position);
+            setPosition(m_position);
+        }
     }
 }
 
@@ -79,28 +87,28 @@ void Entity::draw(sf::RenderTarget &target, sf::RenderStates states) const
 
 void Entity::handleInput(float deltaTime, const InputState &input)
 {
-    // Set velocity based on input
+    // Apply acceleration based on input
     if (auto *kinematics = getComponent<KinematicsComponent>()) {
-        sf::Vector2f velocity(0.f, 0.f);
-        const float speed = 200.f;
+        sf::Vector2f acceleration(0.f, 0.f);
+        const float accelerationForce = 1500.f; // Acceleration force
 
         if (input.moveUp)
-            velocity.y -= speed;
+            acceleration.y -= accelerationForce;
         if (input.moveDown)
-            velocity.y += speed;
+            acceleration.y += accelerationForce;
         if (input.moveLeft)
-            velocity.x -= speed;
+            acceleration.x -= accelerationForce;
         if (input.moveRight)
-            velocity.x += speed;
+            acceleration.x += accelerationForce;
 
-        // Normalize diagonal movement
-        float length = std::sqrt(velocity.x * velocity.x + velocity.y * velocity.y);
+        // Normalize diagonal movement to keep same acceleration magnitude
+        float length = std::sqrt(acceleration.x * acceleration.x + acceleration.y * acceleration.y);
         if (length > 0.f) {
-            velocity /= length;
-            velocity *= speed;
+            acceleration /= length;
+            acceleration *= accelerationForce;
         }
 
-        kinematics->setVelocity(velocity);
+        kinematics->setAcceleration(acceleration);
     }
 }
 

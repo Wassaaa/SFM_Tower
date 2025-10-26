@@ -1,6 +1,7 @@
 #include "KinematicsComponent.h"
 #include "VisualComponent.h"
 #include "CollisionComponent.h"
+#include "ComponentContainer.h"
 #include "../MathUtils.h"
 #include <cmath>
 
@@ -17,12 +18,26 @@ KinematicsComponent::KinematicsComponent(const KinematicsComponentData &data)
     , orbitAngularVelocity(data.orbitAngularVelocity)
     , pulseFrequency(data.pulseFrequency)
     , pulseAmplitude(data.pulseAmplitude)
+    , drag(data.drag)
+    , mass(data.mass)
 {}
 
-void KinematicsComponent::update(float dt, sf::Transformable &visualTransform,
-                                 sf::Transformable &collisionTransform)
+void KinematicsComponent::update(float dt, ComponentContainer &container)
 {
     currentTime += dt;
+
+    // Get components if they exist
+    auto *visual = container.getComponent<VisualComponent>();
+    auto *collision = container.getComponent<CollisionComponent>();
+
+    // If neither exists, nothing to do
+    if (!visual && !collision) {
+        return;
+    }
+
+    // Use visual as primary transform, collision as fallback
+    sf::Transformable *primary = visual ? static_cast<sf::Transformable *>(visual)
+                                        : static_cast<sf::Transformable *>(collision);
 
     // Apply behaviors - can have multiple active at once!
     if (hasFlag(behavior, KinematicsBehavior::Accelerate)) {
@@ -31,35 +46,43 @@ void KinematicsComponent::update(float dt, sf::Transformable &visualTransform,
         angularVelocity += angularAcceleration * dt;
     }
 
+    // Apply drag (linear damping)
+    if (drag > 0.f) {
+        float dampingFactor = 1.f / (1.f + drag * dt);
+        velocity *= dampingFactor;
+    }
+
     if (hasFlag(behavior, KinematicsBehavior::Homing)) {
-        updateHoming(dt, visualTransform);
+        updateHoming(dt, *primary);
     }
 
     if (hasFlag(behavior, KinematicsBehavior::Orbital)) {
-        updateOrbital(dt, visualTransform);
+        updateOrbital(dt, *primary);
     }
     else if (hasFlag(behavior, KinematicsBehavior::Linear) ||
              hasFlag(behavior, KinematicsBehavior::Accelerate)) {
         // Only move linearly if not orbiting (orbital sets position directly)
-        visualTransform.move(velocity * dt);
+        primary->move(velocity * dt);
     }
 
     if (hasFlag(behavior, KinematicsBehavior::Rotating)) {
-        visualTransform.rotate(angularVelocity * dt);
+        primary->rotate(angularVelocity * dt);
     }
 
     if (hasFlag(behavior, KinematicsBehavior::Extending)) {
-        updateExtending(dt, visualTransform);
+        updateExtending(dt, *primary);
     }
 
     if (hasFlag(behavior, KinematicsBehavior::Pulsing)) {
-        updatePulsing(dt, visualTransform);
+        updatePulsing(dt, *primary);
     }
 
-    // Sync collision with visual
-    collisionTransform.setPosition(visualTransform.getPosition());
-    collisionTransform.setRotation(visualTransform.getRotation());
-    collisionTransform.setScale(visualTransform.getScale());
+    // Sync collision with visual if both exist
+    if (visual && collision) {
+        collision->setPosition(visual->getPosition());
+        collision->setRotation(visual->getRotation());
+        collision->setScale(visual->getScale());
+    }
 }
 
 void KinematicsComponent::updateHoming(float dt, sf::Transformable &transform)

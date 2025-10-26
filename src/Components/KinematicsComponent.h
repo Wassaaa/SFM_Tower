@@ -3,14 +3,15 @@
 #include "Component.h"
 #include "../Config/GameConfig.h"
 
+class ComponentContainer;
+
 class KinematicsComponent : public Component
 {
 public:
     KinematicsComponent(const KinematicsComponentData &data);
     ~KinematicsComponent() = default;
 
-    void update(float dt, sf::Transformable &visualTransform,
-                sf::Transformable &collisionTransform);
+    void update(float dt, ComponentContainer &container);
 
     virtual const char *getName() const override { return "KinematicsComponent"; }
 
@@ -57,4 +58,8 @@ private:
     float pulseFrequency{5.f};
     float pulseAmplitude{0.2f};
     float currentTime{0.f};
+
+    // Physics properties
+    float drag{0.f};
+    float mass{1.f};
 };

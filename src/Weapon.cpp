@@ -52,11 +52,7 @@ void Weapon::update(float dt)
         m_orbitCenter = m_owner->getCenter();
         kinematics->setTargetPoint(&m_orbitCenter);
 
-        auto *visual = getComponent<VisualComponent>();
-        auto *collision = getComponent<CollisionComponent>();
-        if (visual && collision) {
-            kinematics->update(dt, *visual, *collision);
-        }
+        kinematics->update(dt, *this);
     }
     // No kinematics: check if weapon should follow owner
     else if (weaponComp && weaponComp->getBehavior() == WeaponBehavior::FollowOwner) {

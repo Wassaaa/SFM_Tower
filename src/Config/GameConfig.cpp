@@ -121,19 +121,23 @@ namespace Config {
                                                  .build())
             .build();
 
-    const EntityConfig TEST_BOX = EntityConfigBuilder()
-                                      .setCollision(CollisionDataBuilder()
-                                                        // .setCircle(25.f)
-                                                        .setBox({50.f, 50.f})
-                                                        .setScale({1.f, 1.f})
-                                                        .setOrigin({25.f, 25.f})
-                                                        .setDebugColor({100, 100, 255, 125})
-                                                        .build())
-                                      .setKinematics(KinematicsDataBuilder()
-                                                         .setVelocity({0.f, 0.f})
-                                                         .setBehavior(KinematicsBehavior::Linear)
-                                                         .build())
-                                      .build();
+    const EntityConfig TEST_BOX =
+        EntityConfigBuilder()
+            .setCollision(CollisionDataBuilder()
+                              // .setCircle(25.f)
+                              .setBox({50.f, 50.f})
+                              .setScale({1.f, 1.f})
+                              .setOrigin({25.f, 25.f})
+                              .setDebugColor({100, 100, 255, 125})
+                              .build())
+            .setKinematics(KinematicsDataBuilder()
+                               .setVelocity({0.f, 0.f})
+                               .setAcceleration({0.f, 0.f})
+                               .setDrag(5.f)
+                               .setMass(1.f)
+                               .setBehavior(KinematicsBehavior::Accelerate)
+                               .build())
+            .build();
 
     const std::unordered_map<EntityType, const EntityConfig &> ENTITY_CONFIGS = {
         {EntityType::PLAYER, PLAYER},
