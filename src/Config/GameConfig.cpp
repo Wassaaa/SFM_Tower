@@ -124,7 +124,7 @@ namespace Config {
     const EntityConfig TEST_BOX =
         EntityConfigBuilder()
             .setCollision(CollisionDataBuilder()
-                              // .setCircle(25.f)
+                              //   .setCircle(25.f)
                               .setBox({50.f, 50.f})
                               .setScale({1.f, 1.f})
                               .setOrigin({25.f, 25.f})
@@ -133,16 +133,26 @@ namespace Config {
             .setKinematics(KinematicsDataBuilder()
                                .setVelocity({0.f, 0.f})
                                .setAcceleration({0.f, 0.f})
-                               .setDrag(5.f)
+                               .setDrag(0.f)
                                .setMass(1.f)
                                .setBehavior(KinematicsBehavior::Accelerate)
                                .build())
             .build();
+
+    const EntityConfig WALL = EntityConfigBuilder()
+                                  .setCollision(CollisionDataBuilder()
+                                                    .setBox({10.f, 10.f}) // Will be scaled per wall
+                                                    .setScale({1.f, 1.f})
+                                                    .setOrigin({5.f, 5.f})
+                                                    .setDebugColor({128, 128, 128, 200})
+                                                    .build())
+                                  .build();
 
     const std::unordered_map<EntityType, const EntityConfig &> ENTITY_CONFIGS = {
         {EntityType::PLAYER, PLAYER},
         {EntityType::TOWER, TOWER},
         {EntityType::LASER_WEAPON, LASER_WEAPON},
         {EntityType::VAMPIRE, VAMPIRE},
-        {EntityType::TEST_BOX, TEST_BOX}};
+        {EntityType::TEST_BOX, TEST_BOX},
+        {EntityType::WALL, WALL}};
 } // namespace Config

@@ -20,6 +20,7 @@ public:
     sf::Vector2f getAcceleration() const { return acceleration; }
     float getAngularVelocity() const { return angularVelocity; }
     KinematicsBehavior getBehavior() const { return behavior; }
+    float getMass() const { return mass; }
 
     // Setters
     void setVelocity(const sf::Vector2f &vel) { velocity = vel; }

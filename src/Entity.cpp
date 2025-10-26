@@ -7,6 +7,7 @@
 #include "Components/AnimationComponent.h"
 #include "Components/DirectionComponent.h"
 #include "InputHandler.h"
+#include "MathUtils.h"
 #include <cmath>
 
 Entity::Entity(Game *pGame, EntityType type, const sf::Vector2f &position)
@@ -55,21 +56,6 @@ void Entity::update(float dt)
         }
         else if (auto *collision = getComponent<CollisionComponent>()) {
             m_position = collision->getPosition();
-        }
-
-        // Keep within screen bounds
-        if (auto *collision = getComponent<CollisionComponent>()) {
-            const float halfSize = 25.f;
-            if (m_position.x - halfSize < 0.f)
-                m_position.x = halfSize;
-            if (m_position.x + halfSize > Constants::SCREEN_WIDTH)
-                m_position.x = Constants::SCREEN_WIDTH - halfSize;
-            if (m_position.y - halfSize < 0.f)
-                m_position.y = halfSize;
-            if (m_position.y + halfSize > Constants::SCREEN_HEIGHT)
-                m_position.y = Constants::SCREEN_HEIGHT - halfSize;
-
-            setPosition(m_position);
         }
     }
 }
@@ -158,7 +144,14 @@ void Entity::updateAnimationAndVisual(float dt)
 
 void Entity::resolveCollision(const sf::Vector2f &pushVector)
 {
-    // Simple collision response - just push the entity away
     m_position += pushVector;
     setPosition(m_position);
+}
+
+void Entity::applyCollisionImpulse(const sf::Vector2f &velocityChange)
+{
+    // Apply velocity change from collision
+    if (auto *kinematics = getComponent<KinematicsComponent>()) {
+        kinematics->setVelocity(kinematics->getVelocity() + velocityChange);
+    }
 }

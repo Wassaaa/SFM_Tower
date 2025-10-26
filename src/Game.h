@@ -9,6 +9,7 @@
 #include "Constants.h"
 #include "Types.h"
 #include "InputHandler.h"
+#include "CollisionSystem.h"
 
 class Tower;
 class Entity;
@@ -36,7 +37,8 @@ public:
     Tower *getTower() const;
     Entity *getPlayerEntity() const { return m_pPlayerEntity; }
 
-    void spawnRandomBox();
+    void spawnBox(const sf::Vector2f *position = nullptr);
+    void createBoundaryWalls();
 
 private:
     std::unique_ptr<Tower> m_pTower;
@@ -49,4 +51,5 @@ private:
     sf::Font m_font;
 
     InputHandler m_inputHandler;
+    CollisionSystem m_collisionSystem;
 };

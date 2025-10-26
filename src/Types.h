@@ -25,5 +25,6 @@ enum class EntityType
     EXPLOSION_WEAPON,
     CONE_WEAPON,
     VAMPIRE,
-    TEST_BOX
+    TEST_BOX,
+    WALL
 };

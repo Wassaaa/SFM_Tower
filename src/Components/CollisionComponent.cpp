@@ -3,6 +3,7 @@
 #include "../MathUtils.h"
 #include <cmath>
 #include <limits>
+#include <iostream>
 
 CollisionComponent::CollisionComponent(const CollisionComponentData &data)
     : m_data(data)
@@ -56,7 +57,23 @@ void CollisionComponent::applyTransforms()
 
 sf::Vector2f CollisionComponent::getCenter() const
 {
-    return getTransform().transformPoint({0.f, 0.f});
+    if (m_type == CollisionShape::Circle) {
+        return getTransform().transformPoint(m_data.origin);
+    }
+
+    const std::vector<sf::Vector2f> worldPoints = getWorldPoints();
+    if (worldPoints.empty()) {
+        return getTransform().transformPoint(m_data.origin);
+    }
+
+    sf::Vector2f sum(0.f, 0.f);
+    for (const auto &point : worldPoints) {
+        sum.x += point.x;
+        sum.y += point.y;
+    }
+
+    float invCount = 1.f / static_cast<float>(worldPoints.size());
+    return sf::Vector2f(sum.x * invCount, sum.y * invCount);
 }
 
 std::vector<sf::Vector2f> CollisionComponent::getWorldPoints() const
@@ -202,7 +219,9 @@ bool CollisionComponent::hasSeparatingAxis(const std::vector<sf::Vector2f> &poin
         return true; // no collision
     }
 
-    float overlap = std::min(max1, max2) - std::max(min1, min2);
+    float overlap1 = max1 - min2; // (moving left on axis)
+    float overlap2 = max2 - min1; // (moving right on axis)
+    float overlap = std::min(overlap1, overlap2);
     // Square overlap for avoiding sqrt
     overlap *= overlap;
 
@@ -214,7 +233,17 @@ bool CollisionComponent::hasSeparatingAxis(const std::vector<sf::Vector2f> &poin
     // Track minimum overlap / collision depth
     if (overlap < minOverlap) {
         minOverlap = overlap;
-        minAxis = axis;
+        // Find the center of the 1D shadow for each object
+        float center1 = (min1 + max1) * 0.5f;
+        float center2 = (min2 + max2) * 0.5f;
+
+        // Point the axis from 1 to 2
+        if (center1 < center2) {
+            minAxis = axis;
+        }
+        else {
+            minAxis = -axis;
+        }
     }
 
     return false;
@@ -263,12 +292,12 @@ CollisionResult CollisionComponent::polygonPolygonCollision(const CollisionCompo
     result.depth = std::sqrt(minOverlap);
     result.normal = VecNormalized(minAxis);
 
-    // Ensure normal points from this to other
-    sf::Vector2f center1 = getCenter();
-    sf::Vector2f center2 = other.getCenter();
-    if (DotProduct(result.normal, center2 - center1) < 0) {
-        result.normal = -result.normal;
-    }
+    // Ensure normal points from this to other using center direction
+    // sf::Vector2f center1 = getCenter();
+    // sf::Vector2f center2 = other.getCenter();
+    // if (DotProduct(result.normal, center2 - center1) < 0.f) {
+    //     result.normal = -result.normal;
+    // }
 
     return result;
 }
