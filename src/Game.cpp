@@ -45,7 +45,7 @@ bool Game::initialise()
     m_pPlayerEntity->getComponent<VisualComponent>()->setScale(3.f, 3.f);
     m_entities.push_back(std::move(playerEntity));
     sf::Vector2f specificPos(200.f, 200.f);
-    spawnBox(&specificPos);
+    // spawnBox(&specificPos);
 
     // Create boundary walls
     createBoundaryWalls();
@@ -56,8 +56,8 @@ bool Game::initialise()
 void Game::createBoundaryWalls()
 {
     const float visibleThickness = 5.f;
-    const float horizontalCollisionThickness = 10.f;
-    const float verticalCollisionThickness = 10.f;
+    const float horizontalCollisionThickness = 2000.f;
+    const float verticalCollisionThickness = 2000.f;
 
     const float halfHorizontal = horizontalCollisionThickness * 0.5f;
     const float halfVertical = verticalCollisionThickness * 0.5f;
