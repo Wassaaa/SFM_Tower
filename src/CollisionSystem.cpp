@@ -46,23 +46,11 @@ void CollisionSystem::update(std::vector<std::unique_ptr<Entity>> &entities, flo
                 // Handle collision based on mass configuration
                 if (std::isinf(mass1)) {
                     // Entity i is static, j is dynamic
-                    std::cout << "[DEBUG] Case: i=static(" << i << "), j=dynamic(" << j
-                              << ") | result.normal=(" << result.normal.x << "," << result.normal.y
-                              << ")" << std::endl;
                     handleStaticDynamicCollision(entities[i].get(), entities[j].get(),
                                                  result.normal, result.depth);
                 }
                 else if (std::isinf(mass2)) {
                     // Entity j is static, i is dynamic
-                    sf::Vector2f pos_i = entities[i]->getPosition();
-                    sf::Vector2f pos_j = entities[j]->getPosition();
-                    std::cout << "[DEBUG] Case: j=static(" << j << "), i=dynamic(" << i << ")"
-                              << std::endl;
-                    std::cout << "  result.normal=(" << result.normal.x << "," << result.normal.y
-                              << ")" << std::endl;
-                    std::cout << "  pos_i=(" << pos_i.x << "," << pos_i.y << ")" << std::endl;
-                    std::cout << "  pos_j=(" << pos_j.x << "," << pos_j.y << ")" << std::endl;
-                    std::cout << "  passing -result.normal to handler" << std::endl;
                     handleStaticDynamicCollision(entities[j].get(), entities[i].get(),
                                                  -result.normal, result.depth);
                 }
@@ -90,11 +78,6 @@ void CollisionSystem::handleStaticDynamicCollision(Entity *staticEntity, Entity 
 
     sf::Vector2f velocity = kin->getVelocity();
     float velAlongNormal = DotProduct(velocity, normal);
-
-    std::cout << "[STATIC-DYNAMIC] Depth: " << depth << " | Normal: (" << normal.x << ", "
-              << normal.y << ")"
-              << " | Vel: (" << velocity.x << ", " << velocity.y << ")"
-              << " | VelAlongNormal: " << velAlongNormal << std::endl;
 
     // Apply impulse if approaching
     if (velAlongNormal < EPSILON) {
