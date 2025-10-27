@@ -124,8 +124,8 @@ namespace Config {
     const EntityConfig TEST_BOX =
         EntityConfigBuilder()
             .setCollision(CollisionDataBuilder()
-                              //   .setCircle(25.f)
-                              .setBox({50.f, 50.f})
+                              .setCircle(25.f)
+                              //   .setBox({50.f, 50.f})
                               .setScale({1.f, 1.f})
                               .setOrigin({25.f, 25.f})
                               .setDebugColor({100, 100, 255, 125})

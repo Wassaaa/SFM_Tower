@@ -58,7 +58,7 @@ void CollisionComponent::applyTransforms()
 sf::Vector2f CollisionComponent::getCenter() const
 {
     if (m_type == CollisionShape::Circle) {
-        return getTransform().transformPoint(m_data.origin);
+        return getTransform().transformPoint(sf::Vector2f(0.f, 0.f));
     }
 
     const std::vector<sf::Vector2f> worldPoints = getWorldPoints();
@@ -115,7 +115,7 @@ CollisionResult CollisionComponent::checkCollision(const CollisionComponent &oth
         // One is circle, one is polygon
         if (m_type == CollisionShape::Circle) {
             CollisionResult result = circlePolygonCollision(other);
-            // Flip normal since we're checking from polygon's perspective for now
+            // Flip normal since we're checking from polygon's perspective
             result.normal = -result.normal;
             return result;
         }
