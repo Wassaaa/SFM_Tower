@@ -42,7 +42,7 @@ void CollisionComponent::draw(sf::RenderTarget &target, sf::RenderStates states)
         }
         polygon.setFillColor(m_data.debugColor);
         polygon.setOutlineColor(outlineColor);
-        polygon.setOutlineThickness(1.0f);
+        // polygon.setOutlineThickness(1.0f);
         target.draw(polygon, states);
     }
 }
@@ -170,37 +170,101 @@ CollisionResult CollisionComponent::circlePolygonCollision(const CollisionCompon
         return result;
     }
 
-    // Find closest point on polygon to circle center
-    float minDistSq = std::numeric_limits<float>::max();
-    sf::Vector2f closestPoint;
-    float radiusSq = radius * radius;
+    float minOverlap = std::numeric_limits<float>::max();
+    sf::Vector2f minAxis;
+    sf::Vector2f polyCenter = other.getCenter();
 
     for (size_t i = 0; i < polyPoints.size(); i++) {
         sf::Vector2f p1 = polyPoints[i];
         sf::Vector2f p2 = polyPoints[(i + 1) % polyPoints.size()];
+        sf::Vector2f edge = p2 - p1;
+        sf::Vector2f axis = Perpendicular(edge);
 
-        sf::Vector2f pointOnEdge = ClosestPointOnSegment(circleCenter, p1, p2);
-        float distSq = DistanceSquared(circleCenter, pointOnEdge);
+        // We must normalize the axis to correctly project the circle's radius
+        axis = VecNormalized(axis);
+        if (VecLengthSquared(axis) < EPSILON * EPSILON) {
+            continue;
+        }
 
-        if (distSq < minDistSq) {
-            minDistSq = distSq;
-            closestPoint = pointOnEdge;
+        // Project the polygon
+        float minPoly, maxPoly;
+        projectOntoAxis(polyPoints, axis, minPoly, maxPoly);
+
+        // Project the circle
+        float circleProj = DotProduct(circleCenter, axis);
+        float minCircle = circleProj - radius;
+        float maxCircle = circleProj + radius;
+
+        // Check for a separating axis
+        if (maxCircle < minPoly || maxPoly < minCircle) {
+            return result;
+        }
+
+        // No gap, calculate the overlap
+        float overlap = std::min(maxCircle - minPoly, maxPoly - minCircle);
+
+        // Track the minimum overlap
+        if (overlap < minOverlap) {
+            minOverlap = overlap;
+            minAxis = axis;
         }
     }
 
-    if (minDistSq >= radiusSq) {
-        return result;
+    sf::Vector2f closestVertex;
+    float minVertexDistSq = std::numeric_limits<float>::max();
+
+    // Find the polygon vertex closest to the circle's center
+    for (const auto &vertex : polyPoints) {
+        float distSq = DistanceSquared(circleCenter, vertex);
+        if (distSq < minVertexDistSq) {
+            minVertexDistSq = distSq;
+            closestVertex = vertex;
+        }
+    }
+
+    // Create the axis from the center to the closest vertex
+    sf::Vector2f axis = closestVertex - circleCenter;
+
+    // Check if circle center is on a vertex
+    if (VecLengthSquared(axis) < EPSILON * EPSILON) {
+        // This is a rare case, but it's a definite collision.
+    }
+    else {
+        axis = VecNormalized(axis);
+
+        // Project the polygon
+        float minPoly, maxPoly;
+        projectOntoAxis(polyPoints, axis, minPoly, maxPoly);
+
+        // Project the circle
+        float circleProj = DotProduct(circleCenter, axis);
+        float minCircle = circleProj - radius;
+        float maxCircle = circleProj + radius;
+
+        // Check for a separating axis
+        if (maxCircle < minPoly || maxPoly < minCircle) {
+            return result; // Found a gap, no collision
+        }
+
+        // Calculate overlap
+        float overlap = std::min(maxCircle - minPoly, maxPoly - minCircle);
+
+        // Track the minimum overlap
+        if (overlap < minOverlap) {
+            minOverlap = overlap;
+            minAxis = axis;
+        }
     }
 
     result.intersects = true;
-    float dist = std::sqrt(minDistSq);
-    result.depth = radius - dist;
+    result.depth = minOverlap;
 
-    sf::Vector2f diff = circleCenter - closestPoint;
-    if (dist > EPSILON)
-        result.normal = diff / dist;
-    else
-        result.normal = sf::Vector2f(1.f, 0.f);
+    sf::Vector2f toCircle = circleCenter - polyCenter;
+    if (DotProduct(minAxis, toCircle) < 0.f) {
+        minAxis = -minAxis;
+    }
+
+    result.normal = minAxis;
 
     return result;
 }
