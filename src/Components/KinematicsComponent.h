@@ -1,66 +1,43 @@
 #pragma once
-#include <SFML/Graphics.hpp>
+#include <SFML/System/Vector2.hpp>
 #include "Component.h"
 #include "../Config/GameConfig.h"
-
-class ComponentContainer;
 
 class KinematicsComponent : public Component
 {
 public:
-    KinematicsComponent(const KinematicsComponentData &data);
-    ~KinematicsComponent() = default;
-
-    void update(float dt, ComponentContainer &container);
-
-    virtual const char *getName() const override { return "KinematicsComponent"; }
-
-    // Getters
-    sf::Vector2f getVelocity() const { return velocity; }
-    sf::Vector2f getAcceleration() const { return acceleration; }
-    float getAngularVelocity() const { return angularVelocity; }
-    KinematicsBehavior getBehavior() const { return behavior; }
-    float getMass() const { return mass; }
-
-    // Setters
-    void setVelocity(const sf::Vector2f &vel) { velocity = vel; }
-    void setAcceleration(const sf::Vector2f &accel) { acceleration = accel; }
-    void setAngularVelocity(float angVel) { angularVelocity = angVel; }
-    void setTargetPoint(sf::Vector2f *target) { targetPoint = target; }
-
-private:
-    void updateHoming(float dt, sf::Transformable &transform);
-    void updateOrbital(float dt, sf::Transformable &transform);
-    void updateExtending(float dt, sf::Transformable &transform);
-    void updatePulsing(float dt, sf::Transformable &transform);
-
-    const KinematicsComponentData &m_data;
-
-    // Linear motion
+    // config based runtime state
     sf::Vector2f velocity;
     sf::Vector2f acceleration;
-    float speed;
-
-    // Rotational motion
     float angularVelocity;
     float angularAcceleration;
-
-    // Scale animation
-    sf::Vector2f scaleVelocity;
-
-    // Behavior
     KinematicsBehavior behavior;
+    float orbitRadius;
+    float orbitAngularVelocity;
+    float pulseFrequency;
+    float pulseAmplitude;
+    float drag;
+    float mass;
 
-    // Behavior-specific data
-    sf::Vector2f *targetPoint{nullptr}; // For homing/orbital
-    float orbitRadius{0.f};
+    // calculated runtime state
+    sf::Vector2f *targetPoint{nullptr};
     float orbitAngle{0.f};
-    float orbitAngularVelocity{0.f};
-    float pulseFrequency{5.f};
-    float pulseAmplitude{0.2f};
     float currentTime{0.f};
+    sf::Vector2f baseScale{1.f, 1.f};
 
-    // Physics properties
-    float drag{0.f};
-    float mass{1.f};
+    KinematicsComponent(const KinematicsComponentData &data)
+        : velocity(data.velocity)
+        , acceleration(data.acceleration)
+        , angularVelocity(data.angularVelocity)
+        , angularAcceleration(data.angularAcceleration)
+        , behavior(data.behavior)
+        , orbitRadius(data.orbitRadius)
+        , orbitAngularVelocity(data.orbitAngularVelocity)
+        , pulseFrequency(data.pulseFrequency)
+        , pulseAmplitude(data.pulseAmplitude)
+        , drag(data.drag)
+        , mass(data.mass)
+    {}
+
+    virtual const char *getName() const override { return "KinematicsComponent"; }
 };
