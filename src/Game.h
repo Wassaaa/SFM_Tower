@@ -9,15 +9,13 @@
 #include "Constants.h"
 #include "Types.h"
 #include "InputHandler.h"
-#include "CollisionSystem.h"
+#include "Components/CollisionSystem.h"
+#include "Components/KinematicsSystem.h"
+#include "DebugRenderSystem.h"
 
-class Tower;
 class Entity;
 class Game;
-
-namespace sf {
-    class Clock;
-}
+// ... (sf::Clock) ...
 
 class Game : public sf::Drawable
 {
@@ -34,14 +32,12 @@ public:
     void onKeyPressed(sf::Keyboard::Key key);
     void onKeyReleased(sf::Keyboard::Key key);
 
-    Tower *getTower() const;
     Entity *getPlayerEntity() const { return m_pPlayerEntity; }
 
     void spawnBox(const sf::Vector2f *position = nullptr);
     void createBoundaryWalls();
 
 private:
-    std::unique_ptr<Tower> m_pTower;
     std::vector<std::unique_ptr<Entity>> m_entities;
     Entity *m_pPlayerEntity;
 
@@ -51,5 +47,9 @@ private:
     sf::Font m_font;
 
     InputHandler m_inputHandler;
-    CollisionSystem m_collisionSystem;
+
+    // Systems
+    std::unique_ptr<CollisionSystem> m_collisionSystem;
+    std::unique_ptr<KinematicsSystem> m_kinematicsSystem;
+    std::unique_ptr<DebugRenderSystem> m_debugRenderSystem;
 };

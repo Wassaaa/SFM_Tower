@@ -1,0 +1,16 @@
+#pragma once
+#include <SFML/Graphics.hpp>
+#include <vector>
+#include <memory>
+
+class Entity;
+
+class DebugRenderSystem
+{
+public:
+    DebugRenderSystem() = default;
+    ~DebugRenderSystem() = default;
+
+    void draw(sf::RenderTarget &target, sf::RenderStates states,
+              const std::vector<std::unique_ptr<Entity>> &entities, bool debugDrawEnabled) const;
+};

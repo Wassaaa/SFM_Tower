@@ -6,10 +6,9 @@
 #include <random>
 
 #include "ResourceManager.h"
-#include "Tower.h"
 #include "Entity.h"
+#include "Components/TransformComponent.h"
 #include "Components/CollisionComponent.h"
-#include "Components/VisualComponent.h"
 #include "Constants.h"
 
 Game::Game()
@@ -22,30 +21,22 @@ Game::~Game() {}
 
 bool Game::initialise()
 {
-    /*
-        PAY ATTENTION HIVER!
-            If you want to load any assets (fonts, textures) please use the pattern shown below
-    */
-
     if (!m_font.loadFromFile(ResourceManager::getFilePath("Lavigne.ttf"))) {
         std::cerr << "Unable to load font" << std::endl;
         return false;
     }
 
-    // Create a tower in the center of the screen
-    // sf::Vector2f towerPosition(Constants::SCREEN_WIDTH / 2.f, Constants::SCREEN_HEIGHT / 2.f);
-    // m_pTower = std::make_unique<Tower>(this, towerPosition);
-    // Add a weapon to the tower for testing
-    // m_pTower->addWeapon(EntityType::LASER_WEAPON);
+    // init systems
+    m_collisionSystem = std::make_unique<CollisionSystem>();
+    m_kinematicsSystem = std::make_unique<KinematicsSystem>();
+    m_debugRenderSystem = std::make_unique<DebugRenderSystem>();
 
     // Create a player controlled box
     auto playerEntity =
         std::make_unique<Entity>(this, EntityType::TEST_BOX, sf::Vector2f(200.f, 200.f));
     m_pPlayerEntity = playerEntity.get();
-    m_pPlayerEntity->getComponent<VisualComponent>()->setScale(3.f, 3.f);
+
     m_entities.push_back(std::move(playerEntity));
-    sf::Vector2f specificPos(200.f, 200.f);
-    // spawnBox(&specificPos);
 
     // Create boundary walls
     createBoundaryWalls();
@@ -66,9 +57,10 @@ void Game::createBoundaryWalls()
     auto topWall = std::make_unique<Entity>(
         this, EntityType::WALL,
         sf::Vector2f(Constants::SCREEN_WIDTH / 2.f, visibleThickness - halfHorizontal));
-    if (auto *collision = topWall->getComponent<CollisionComponent>()) {
-        collision->setScale(
-            sf::Vector2f(Constants::SCREEN_WIDTH / 10.f, horizontalCollisionThickness / 10.f));
+    // We get the TransformComponent and set its scale
+    if (auto *transform = topWall->getComponent<TransformComponent>()) {
+        transform->scale =
+            sf::Vector2f(Constants::SCREEN_WIDTH / 10.f, horizontalCollisionThickness / 10.f);
     }
     m_entities.push_back(std::move(topWall));
 
@@ -77,9 +69,9 @@ void Game::createBoundaryWalls()
         this, EntityType::WALL,
         sf::Vector2f(Constants::SCREEN_WIDTH / 2.f,
                      Constants::SCREEN_HEIGHT - visibleThickness + halfHorizontal));
-    if (auto *collision = bottomWall->getComponent<CollisionComponent>()) {
-        collision->setScale(
-            sf::Vector2f(Constants::SCREEN_WIDTH / 10.f, horizontalCollisionThickness / 10.f));
+    if (auto *transform = bottomWall->getComponent<TransformComponent>()) {
+        transform->scale =
+            sf::Vector2f(Constants::SCREEN_WIDTH / 10.f, horizontalCollisionThickness / 10.f);
     }
     m_entities.push_back(std::move(bottomWall));
 
@@ -87,9 +79,9 @@ void Game::createBoundaryWalls()
     auto leftWall = std::make_unique<Entity>(
         this, EntityType::WALL,
         sf::Vector2f(visibleThickness - halfVertical, Constants::SCREEN_HEIGHT / 2.f));
-    if (auto *collision = leftWall->getComponent<CollisionComponent>()) {
-        collision->setScale(
-            sf::Vector2f(verticalCollisionThickness / 10.f, Constants::SCREEN_HEIGHT / 10.f));
+    if (auto *transform = leftWall->getComponent<TransformComponent>()) {
+        transform->scale =
+            sf::Vector2f(verticalCollisionThickness / 10.f, Constants::SCREEN_HEIGHT / 10.f);
     }
     m_entities.push_back(std::move(leftWall));
 
@@ -98,43 +90,35 @@ void Game::createBoundaryWalls()
         this, EntityType::WALL,
         sf::Vector2f(Constants::SCREEN_WIDTH - visibleThickness + halfVertical,
                      Constants::SCREEN_HEIGHT / 2.f));
-    if (auto *collision = rightWall->getComponent<CollisionComponent>()) {
-        collision->setScale(
-            sf::Vector2f(verticalCollisionThickness / 10.f, Constants::SCREEN_HEIGHT / 10.f));
+    if (auto *transform = rightWall->getComponent<TransformComponent>()) {
+        transform->scale =
+            sf::Vector2f(verticalCollisionThickness / 10.f, Constants::SCREEN_HEIGHT / 10.f);
     }
     m_entities.push_back(std::move(rightWall));
 }
 
 void Game::update(float deltaTime)
 {
-    // Cap deltaTime to prevent huge jumps
+    // Cap deltaTime
     deltaTime = std::min(deltaTime, 0.1f);
 
     switch (m_state) {
     case GameState::ACTIVE: {
-        if (m_pTower) {
-            m_pTower->update(deltaTime);
-        }
-
         const InputState &input = m_inputHandler.getState();
 
-        // Handle game-level input actions
         if (input.spawnBox) {
             spawnBox();
         }
 
-        // Pass input to player entity
         if (m_pPlayerEntity) {
             m_pPlayerEntity->handleInput(deltaTime, input);
         }
 
-        // Update all entities
-        for (auto &entity : m_entities) {
-            entity->update(deltaTime);
-        }
+        // Run logic systems
+        m_kinematicsSystem->update(deltaTime, m_entities);
+        m_collisionSystem->update(m_entities, deltaTime);
 
-        // Handle collisions
-        m_collisionSystem.update(m_entities, deltaTime);
+        // AnimationSystem, etc
     } break;
 
     case GameState::WAITING:
@@ -144,15 +128,14 @@ void Game::update(float deltaTime)
 
 void Game::draw(sf::RenderTarget &target, sf::RenderStates states) const
 {
-    // Draw entities
     for (const auto &entity : m_entities) {
-        entity->draw(target, states);
+        if (entity->getType() != EntityType::TEST_BOX) {
+            // This uses the old VisualComponent draw for now
+            entity->draw(target, states);
+        }
     }
 
-    // Draw tower
-    if (m_pTower) {
-        m_pTower->draw(target, states);
-    }
+    m_debugRenderSystem->draw(target, states, m_entities, Constants::DEBUG_DRAW);
 }
 
 void Game::onKeyPressed(sf::Keyboard::Key key)
@@ -163,11 +146,6 @@ void Game::onKeyPressed(sf::Keyboard::Key key)
 void Game::onKeyReleased(sf::Keyboard::Key key)
 {
     m_inputHandler.onKeyReleased(key);
-}
-
-Tower *Game::getTower() const
-{
-    return m_pTower.get();
 }
 
 void Game::spawnBox(const sf::Vector2f *position)
