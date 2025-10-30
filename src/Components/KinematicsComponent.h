@@ -18,6 +18,7 @@ public:
     float pulseAmplitude;
     float drag;
     float mass;
+    bool isStatic;
 
     // calculated runtime state
     sf::Vector2f *targetPoint{nullptr};
@@ -37,6 +38,7 @@ public:
         , pulseAmplitude(data.pulseAmplitude)
         , drag(data.drag)
         , mass(data.mass)
+        , isStatic(data.isStatic)
     {}
 
     virtual const char *getName() const override { return "KinematicsComponent"; }

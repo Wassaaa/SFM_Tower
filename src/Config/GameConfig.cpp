@@ -2,6 +2,7 @@
 #include "ComponentDataBuilder.h"
 #include "EntityConfigBuilder.h"
 #include "../Constants.h"
+#include <math.h>
 
 namespace Config {
     const EntityConfig PLAYER =
@@ -148,6 +149,10 @@ namespace Config {
                     .setOrigin({Constants::SCREEN_WIDTH / 2, Constants::WALL_THICKNESS / 2})
                     .setDebugColor({128, 128, 128, 200})
                     .build())
+            .setKinematics(KinematicsDataBuilder()
+                               .setMass(std::numeric_limits<float>::infinity())
+                               .setStatic(true)
+                               .build())
             .build();
 
     const EntityConfig WALL_VERTICAL =
@@ -158,6 +163,10 @@ namespace Config {
                     .setOrigin({Constants::WALL_THICKNESS / 2, Constants::SCREEN_HEIGHT / 2})
                     .setDebugColor({128, 128, 128, 200})
                     .build())
+            .setKinematics(KinematicsDataBuilder()
+                               .setMass(std::numeric_limits<float>::infinity())
+                               .setStatic(true)
+                               .build())
             .build();
 
     const std::unordered_map<EntityType, const EntityConfig &> ENTITY_CONFIGS = {

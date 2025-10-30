@@ -116,6 +116,7 @@ struct KinematicsComponentData
     float pulseAmplitude;
     float drag; // Linear damping (0 = no drag, 1 = instant stop)
     float mass; // For physics response (1.0 = default)
+    bool isStatic;
 };
 
 struct EntityConfig

@@ -256,6 +256,11 @@ public:
         m_mass = mass;
         return *this;
     }
+    KinematicsDataBuilder &setStatic(bool isStatic)
+    {
+        m_isStatic = isStatic;
+        return *this;
+    }
     KinematicsComponentData build() const
     {
         return {m_velocity,
@@ -269,7 +274,8 @@ public:
                 m_pulseFrequency,
                 m_pulseAmplitude,
                 m_drag,
-                m_mass};
+                m_mass,
+                m_isStatic};
     }
 
 private:
@@ -285,4 +291,5 @@ private:
     float m_pulseAmplitude{0.2f};
     float m_drag{0.f};
     float m_mass{1.f};
+    bool m_isStatic{false};
 };
