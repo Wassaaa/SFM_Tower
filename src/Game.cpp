@@ -47,53 +47,34 @@ bool Game::initialise()
 void Game::createBoundaryWalls()
 {
     const float visibleThickness = 5.f;
-    const float horizontalCollisionThickness = 2000.f;
-    const float verticalCollisionThickness = 2000.f;
-
-    const float halfHorizontal = horizontalCollisionThickness * 0.5f;
-    const float halfVertical = verticalCollisionThickness * 0.5f;
 
     // Top wall
     auto topWall = std::make_unique<Entity>(
-        this, EntityType::WALL,
-        sf::Vector2f(Constants::SCREEN_WIDTH / 2.f, visibleThickness - halfHorizontal));
-    // We get the TransformComponent and set its scale
-    if (auto *transform = topWall->getComponent<TransformComponent>()) {
-        transform->scale =
-            sf::Vector2f(Constants::SCREEN_WIDTH / 10.f, horizontalCollisionThickness / 10.f);
-    }
+        this, EntityType::WALL_HORIZONTAL,
+        sf::Vector2f(Constants::SCREEN_WIDTH / 2.f,
+                     0.f - (Constants::WALL_THICKNESS / 2) + visibleThickness));
     m_entities.push_back(std::move(topWall));
 
     // Bottom wall
     auto bottomWall = std::make_unique<Entity>(
-        this, EntityType::WALL,
-        sf::Vector2f(Constants::SCREEN_WIDTH / 2.f,
-                     Constants::SCREEN_HEIGHT - visibleThickness + halfHorizontal));
-    if (auto *transform = bottomWall->getComponent<TransformComponent>()) {
-        transform->scale =
-            sf::Vector2f(Constants::SCREEN_WIDTH / 10.f, horizontalCollisionThickness / 10.f);
-    }
+        this, EntityType::WALL_HORIZONTAL,
+        sf::Vector2f(Constants::SCREEN_WIDTH / 2.f, Constants::SCREEN_HEIGHT +
+                                                        (Constants::WALL_THICKNESS / 2) -
+                                                        visibleThickness));
     m_entities.push_back(std::move(bottomWall));
 
     // Left wall
     auto leftWall = std::make_unique<Entity>(
-        this, EntityType::WALL,
-        sf::Vector2f(visibleThickness - halfVertical, Constants::SCREEN_HEIGHT / 2.f));
-    if (auto *transform = leftWall->getComponent<TransformComponent>()) {
-        transform->scale =
-            sf::Vector2f(verticalCollisionThickness / 10.f, Constants::SCREEN_HEIGHT / 10.f);
-    }
+        this, EntityType::WALL_VERTICAL,
+        sf::Vector2f(0.f - (Constants::WALL_THICKNESS / 2) + visibleThickness,
+                     Constants::SCREEN_HEIGHT / 2.f));
     m_entities.push_back(std::move(leftWall));
 
-    // Right wall
+    // right wall
     auto rightWall = std::make_unique<Entity>(
-        this, EntityType::WALL,
-        sf::Vector2f(Constants::SCREEN_WIDTH - visibleThickness + halfVertical,
+        this, EntityType::WALL_VERTICAL,
+        sf::Vector2f(Constants::SCREEN_WIDTH + (Constants::WALL_THICKNESS / 2) - visibleThickness,
                      Constants::SCREEN_HEIGHT / 2.f));
-    if (auto *transform = rightWall->getComponent<TransformComponent>()) {
-        transform->scale =
-            sf::Vector2f(verticalCollisionThickness / 10.f, Constants::SCREEN_HEIGHT / 10.f);
-    }
     m_entities.push_back(std::move(rightWall));
 }
 

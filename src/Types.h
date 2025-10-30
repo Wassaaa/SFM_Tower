@@ -26,5 +26,6 @@ enum class EntityType
     CONE_WEAPON,
     VAMPIRE,
     TEST_BOX,
-    WALL
+    WALL_HORIZONTAL,
+    WALL_VERTICAL,
 };

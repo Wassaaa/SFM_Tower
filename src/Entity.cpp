@@ -116,8 +116,6 @@ void Entity::resolveCollision(const sf::Vector2f &pushVector)
 {
     if (auto *transform = getComponent<TransformComponent>()) {
         transform->position += pushVector;
-        // We must also call setPosition to sync any old components
-        setPosition(transform->position);
     }
 }
 

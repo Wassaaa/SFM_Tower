@@ -1,6 +1,7 @@
 #include "GameConfig.h"
 #include "ComponentDataBuilder.h"
 #include "EntityConfigBuilder.h"
+#include "../Constants.h"
 
 namespace Config {
     const EntityConfig PLAYER =
@@ -139,14 +140,25 @@ namespace Config {
                                .build())
             .build();
 
-    const EntityConfig WALL = EntityConfigBuilder()
-                                  .setCollision(CollisionDataBuilder()
-                                                    .setBox({10.f, 10.f}) // Will be scaled per wall
-                                                    .setScale({1.f, 1.f})
-                                                    .setOrigin({5.f, 5.f})
-                                                    .setDebugColor({128, 128, 128, 200})
-                                                    .build())
-                                  .build();
+    const EntityConfig WALL_HORIZONTAL =
+        EntityConfigBuilder()
+            .setCollision(
+                CollisionDataBuilder()
+                    .setBox({Constants::SCREEN_WIDTH, Constants::WALL_THICKNESS})
+                    .setOrigin({Constants::SCREEN_WIDTH / 2, Constants::WALL_THICKNESS / 2})
+                    .setDebugColor({128, 128, 128, 200})
+                    .build())
+            .build();
+
+    const EntityConfig WALL_VERTICAL =
+        EntityConfigBuilder()
+            .setCollision(
+                CollisionDataBuilder()
+                    .setBox({Constants::WALL_THICKNESS, Constants::SCREEN_HEIGHT})
+                    .setOrigin({Constants::WALL_THICKNESS / 2, Constants::SCREEN_HEIGHT / 2})
+                    .setDebugColor({128, 128, 128, 200})
+                    .build())
+            .build();
 
     const std::unordered_map<EntityType, const EntityConfig &> ENTITY_CONFIGS = {
         {EntityType::PLAYER, PLAYER},
@@ -154,5 +166,7 @@ namespace Config {
         {EntityType::LASER_WEAPON, LASER_WEAPON},
         {EntityType::VAMPIRE, VAMPIRE},
         {EntityType::TEST_BOX, TEST_BOX},
-        {EntityType::WALL, WALL}};
+        {EntityType::WALL_HORIZONTAL, WALL_HORIZONTAL},
+        {EntityType::WALL_VERTICAL, WALL_VERTICAL}}; // namespace Config
+
 } // namespace Config

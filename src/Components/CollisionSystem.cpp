@@ -332,7 +332,7 @@ CollisionResult CollisionSystem::circlePolygonCollision(const CollisionComponent
     CollisionResult result = {false, {0.f, 0.f}, 0.f};
 
     // Circle is 'this', polygon is 'other'
-    sf::Vector2f circleCenter = getCenter(circleCol, circleCenter);
+    sf::Vector2f circleCenter = getCenter(circleCol, circleTrans);
     float radius = getWorldRadius(circleCol, circleTrans);
     std::vector<sf::Vector2f> polyPoints = getWorldPoints(polyCol, polyTrans);
 
