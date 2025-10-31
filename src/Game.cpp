@@ -34,7 +34,10 @@ bool Game::initialise()
 
     // Create a player controlled box
     auto playerEntity =
-        std::make_unique<Entity>(this, EntityType::TEST_BOX, sf::Vector2f(200.f, 200.f));
+        std::make_unique<Entity>(this, EntityType::TOWER, sf::Vector2f(200.f, 200.f));
+    // playerEntity->setMass(10.f);
+    // auto playerEntity =
+    //     std::make_unique<Entity>(this, EntityType::TEST_BOX, sf::Vector2f(200.f, 200.f));
     // playerEntity->setMass(std::numeric_limits<float>::infinity());
     m_pPlayerEntity = playerEntity.get();
 
@@ -152,7 +155,7 @@ void Game::spawnBox(const sf::Vector2f *position)
 
     auto box = std::make_unique<Entity>(this, EntityType::TEST_BOX, spawnPos);
     if (auto *kin = box->getComponent<KinematicsComponent>()) {
-        kin->mass = std::numeric_limits<float>::infinity();
+        // kin->mass = std::numeric_limits<float>::infinity();
         kin->velocity = rnd;
     }
     m_entities.push_back(std::move(box));
