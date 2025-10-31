@@ -207,6 +207,14 @@ sf::FloatRect CollisionSystem::getBounds(const CollisionComponent &col,
     }
 }
 
+/**
+ * @brief Resolves a collision between a static and a dynamic entity.
+ * @param staticEntity The static (immovable) entity.
+ * @param dynamicEntity The dynamic (movable) entity to be pushed.
+ * @param normal The collision normal, MUST point AWAY from the static entity
+ * and TOWARDS the dynamic entity.
+ * @param depth The penetration depth.
+ */
 void CollisionSystem::handleStaticDynamicCollision(Entity *staticEntity, Entity *dynamicEntity,
                                                    const sf::Vector2f &normal, float depth)
 {
@@ -253,6 +261,13 @@ void CollisionSystem::handleStaticStaticCollision(Entity *entityA, Entity *entit
         return handleStaticDynamicCollision(entityB, entityA, -normal, depth);
 }
 
+/**
+ * @brief Resolves a collision between a dynamic entities.
+ * @param entityA The static (immovable) entity.
+ * @param entityB The dynamic (movable) entity to be pushed.
+ * @param normal The collision normal, MUST point from entityA TO entityB.
+ * @param depth The penetration depth.
+ */
 void CollisionSystem::handleDynamicDynamicCollision(Entity *entityA, Entity *entityB,
                                                     const sf::Vector2f &normal, float depth)
 {
