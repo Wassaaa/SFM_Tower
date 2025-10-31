@@ -19,9 +19,7 @@ void InputHandler::onKeyPressed(sf::Keyboard::Key key)
         m_state.action1Released = false;
     }
     else if (key == sf::Keyboard::B) {
-        if (m_state.spawnBoxReleased)
             m_state.spawnBox = true;
-        m_state.spawnBoxReleased = false;
     }
 }
 
@@ -44,6 +42,5 @@ void InputHandler::onKeyReleased(sf::Keyboard::Key key)
     }
     else if (key == sf::Keyboard::B) {
         m_state.spawnBox = false;
-        m_state.spawnBoxReleased = true;
     }
 }

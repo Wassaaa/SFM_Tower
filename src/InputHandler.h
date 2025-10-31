@@ -14,7 +14,6 @@ struct InputState
     bool action1 = false;
     bool action1Released = true;
     bool spawnBox = false;
-    bool spawnBoxReleased = true;
 
     bool hasMovementInput() const { return moveUp || moveDown || moveLeft || moveRight; }
 };
@@ -28,7 +27,7 @@ public:
     void onKeyPressed(sf::Keyboard::Key key);
     void onKeyReleased(sf::Keyboard::Key key);
 
-    const InputState &getState() const { return m_state; }
+    InputState &getState() { return m_state; }
 
 private:
     InputState m_state;

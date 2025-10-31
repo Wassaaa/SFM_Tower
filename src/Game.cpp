@@ -91,10 +91,11 @@ void Game::update(float deltaTime)
 
     switch (m_state) {
     case GameState::ACTIVE: {
-        const InputState &input = m_inputHandler.getState();
+        InputState &input = m_inputHandler.getState();
 
         if (input.spawnBox) {
             spawnBox();
+            input.spawnBox = false;
         }
 
         if (m_pPlayerEntity) {
