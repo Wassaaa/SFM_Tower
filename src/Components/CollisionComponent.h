@@ -60,7 +60,6 @@ private:
         switch (type) {
         case CollisionShape::Circle: {
             auto circle = std::make_shared<sf::CircleShape>(radius);
-            circle->setOrigin(radius, radius);
             m_debugShape = std::move(circle);
             break;
         }
@@ -75,9 +74,12 @@ private:
         default:
             break;
         }
+        m_debugShape->setOrigin(origin);
         m_debugShape->setScale(scale);
         m_debugShape->setRotation(rotation);
         m_debugShape->setPosition(offset);
+
         m_debugShape->setFillColor(debugColor);
+        m_debugShape->setOutlineThickness(1.f);
     }
 };

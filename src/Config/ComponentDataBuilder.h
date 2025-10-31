@@ -50,6 +50,7 @@ public:
     {
         m_type = CollisionShape::Circle;
         m_radius = radius;
+        m_origin = {radius, radius};
         return *this;
     }
     CollisionDataBuilder &setPolygon(const std::vector<sf::Vector2f> &points)
@@ -72,6 +73,9 @@ public:
     CollisionDataBuilder &setOrigin(const sf::Vector2f &origin)
     {
         m_origin = origin;
+        if (m_type == CollisionShape::Circle) {
+            m_origin = {m_radius, m_radius};
+        }
         return *this;
     }
     CollisionDataBuilder &setOffset(const sf::Vector2f &offset)

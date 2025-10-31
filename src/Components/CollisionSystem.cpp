@@ -167,7 +167,7 @@ sf::Vector2f CollisionSystem::getCenter(const CollisionComponent &col,
 {
     if (col.type == CollisionShape::Circle) {
         // Center of a circle is its origin point, transformed
-        return getComponentTransform(col, trans).transformPoint(0, 0);
+        return getComponentTransform(col, trans).transformPoint(col.origin);
     }
 
     // For polygons, calculate centroid
