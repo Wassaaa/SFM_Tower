@@ -250,7 +250,7 @@ void CollisionSystem::handleStaticStaticCollision(Entity *entityA, Entity *entit
     if (kinA->isStatic)
         return handleStaticDynamicCollision(entityA, entityB, normal, depth);
     if (kinB->isStatic)
-        return handleStaticDynamicCollision(entityB, entityA, normal, depth);
+        return handleStaticDynamicCollision(entityB, entityA, -normal, depth);
 }
 
 void CollisionSystem::handleDynamicDynamicCollision(Entity *entityA, Entity *entityB,
