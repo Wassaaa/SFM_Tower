@@ -24,6 +24,8 @@ private:
                                       const sf::Vector2f &normal, float depth);
     void handleDynamicDynamicCollision(Entity *entity1, Entity *entity2, const sf::Vector2f &normal,
                                        float depth);
+    void handleStaticStaticCollision(Entity *entityA, Entity *entityB, const sf::Vector2f &normal,
+                                     float depth);
 
     // Main check function
     CollisionResult checkCollision(const CollisionComponent &colA, const TransformComponent &transA,

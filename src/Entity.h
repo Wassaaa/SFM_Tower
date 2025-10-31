@@ -23,6 +23,10 @@ public:
 
     EntityType getType() const { return m_type; }
     void setColliding(bool colliding);
+    virtual void enableCollision(bool state);
+
+    virtual void setMass(float mass);
+    virtual void setStatic(bool isStatic);
 
     Game *getGame() const { return m_pGame; }
     void resolveCollision(const sf::Vector2f &pushVector);

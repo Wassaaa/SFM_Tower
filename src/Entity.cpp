@@ -104,6 +104,31 @@ void Entity::setColliding(bool colliding)
     }
 }
 
+void Entity::enableCollision(bool state)
+{
+    if (auto *collision = getComponent<CollisionComponent>()) {
+        collision->setEnabled(state);
+    }
+}
+
+void Entity::setMass(float mass)
+{
+    if (auto *kinematics = getComponent<KinematicsComponent>()) {
+        kinematics->mass = mass;
+    }
+}
+
+void Entity::setStatic(bool isStatic)
+{
+    if (auto *kinematics = getComponent<KinematicsComponent>()) {
+        if (isStatic) {
+            kinematics->acceleration = sf::Vector2f(0, 0);
+            kinematics->velocity = sf::Vector2f(0, 0);
+        }
+        kinematics->isStatic = isStatic;
+    }
+}
+
 sf::Vector2f Entity::getCenter() const
 {
     if (auto *transform = getComponent<TransformComponent>()) {

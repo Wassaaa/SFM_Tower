@@ -34,6 +34,9 @@ void CollisionSystem::update(std::vector<std::unique_ptr<Entity>> &entities, flo
             if (!kin1 && !kin2) {
                 continue;
             }
+            if (kin1 && kin1->isStatic && kin2 && kin2->isStatic) {
+                continue;
+            }
 
             CollisionResult result =
                 checkCollision(*collision1, *transform1, *collision2, *transform2);
@@ -46,7 +49,8 @@ void CollisionSystem::update(std::vector<std::unique_ptr<Entity>> &entities, flo
                 float mass2 = kin2 ? kin2->mass : std::numeric_limits<float>::infinity();
 
                 if (std::isinf(mass1) && std::isinf(mass2)) {
-                    // Both are static, do nothing
+                    handleStaticStaticCollision(entities[i].get(), entities[j].get(), result.normal,
+                                                result.depth);
                 }
                 else if (std::isinf(mass1)) {
                     handleStaticDynamicCollision(entities[i].get(), entities[j].get(),
@@ -225,6 +229,30 @@ void CollisionSystem::handleStaticDynamicCollision(Entity *staticEntity, Entity 
     dynamicEntity->resolveCollision(pushVector);
 }
 
+void CollisionSystem::handleStaticStaticCollision(Entity *entityA, Entity *entityB,
+                                                  const sf::Vector2f &normal, float depth)
+{
+    auto *kinA = entityA->getComponent<KinematicsComponent>();
+    auto *kinB = entityB->getComponent<KinematicsComponent>();
+
+    if (!kinA || !kinB)
+        return;
+
+    // both pure static, do nothing, shouldn't happen
+    if (kinA->isStatic && kinB->isStatic)
+        return;
+
+    // both infinite mass, no pure static
+    if (!kinA->isStatic && !kinB->isStatic)
+        return handleDynamicDynamicCollision(entityA, entityB, normal, depth);
+
+    // one pure static, one infinite mass
+    if (kinA->isStatic)
+        return handleStaticDynamicCollision(entityA, entityB, normal, depth);
+    if (kinB->isStatic)
+        return handleStaticDynamicCollision(entityB, entityA, normal, depth);
+}
+
 void CollisionSystem::handleDynamicDynamicCollision(Entity *entityA, Entity *entityB,
                                                     const sf::Vector2f &normal, float depth)
 {
@@ -236,6 +264,11 @@ void CollisionSystem::handleDynamicDynamicCollision(Entity *entityA, Entity *ent
 
     float massA = kinA->mass;
     float massB = kinB->mass;
+    if (massA == std::numeric_limits<float>::infinity() &&
+        massB == std::numeric_limits<float>::infinity()) {
+        massA = 1.f;
+        massB = 1.f;
+    }
     float totalMass = massA + massB;
 
     // Get relative velocity along collision normal

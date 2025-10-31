@@ -15,7 +15,6 @@
 
 class Entity;
 class Game;
-// ... (sf::Clock) ...
 
 class Game : public sf::Drawable
 {

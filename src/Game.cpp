@@ -9,6 +9,7 @@
 #include "Entity.h"
 #include "Components/TransformComponent.h"
 #include "Components/CollisionComponent.h"
+#include "Components/KinematicsComponent.h"
 #include "Constants.h"
 
 Game::Game()
@@ -34,6 +35,7 @@ bool Game::initialise()
     // Create a player controlled box
     auto playerEntity =
         std::make_unique<Entity>(this, EntityType::TEST_BOX, sf::Vector2f(200.f, 200.f));
+    // playerEntity->setMass(std::numeric_limits<float>::infinity());
     m_pPlayerEntity = playerEntity.get();
 
     m_entities.push_back(std::move(playerEntity));
@@ -53,6 +55,7 @@ void Game::createBoundaryWalls()
         this, EntityType::WALL_HORIZONTAL,
         sf::Vector2f(Constants::SCREEN_WIDTH / 2.f,
                      0.f - (Constants::WALL_THICKNESS / 2) + visibleThickness));
+    topWall->setStatic(true);
     m_entities.push_back(std::move(topWall));
 
     // Bottom wall
@@ -61,6 +64,7 @@ void Game::createBoundaryWalls()
         sf::Vector2f(Constants::SCREEN_WIDTH / 2.f, Constants::SCREEN_HEIGHT +
                                                         (Constants::WALL_THICKNESS / 2) -
                                                         visibleThickness));
+    bottomWall->setStatic(true);
     m_entities.push_back(std::move(bottomWall));
 
     // Left wall
@@ -68,6 +72,7 @@ void Game::createBoundaryWalls()
         this, EntityType::WALL_VERTICAL,
         sf::Vector2f(0.f - (Constants::WALL_THICKNESS / 2) + visibleThickness,
                      Constants::SCREEN_HEIGHT / 2.f));
+    leftWall->setStatic(true);
     m_entities.push_back(std::move(leftWall));
 
     // right wall
@@ -75,6 +80,7 @@ void Game::createBoundaryWalls()
         this, EntityType::WALL_VERTICAL,
         sf::Vector2f(Constants::SCREEN_WIDTH + (Constants::WALL_THICKNESS / 2) - visibleThickness,
                      Constants::SCREEN_HEIGHT / 2.f));
+    rightWall->setStatic(true);
     m_entities.push_back(std::move(rightWall));
 }
 
@@ -132,6 +138,7 @@ void Game::onKeyReleased(sf::Keyboard::Key key)
 void Game::spawnBox(const sf::Vector2f *position)
 {
     sf::Vector2f spawnPos;
+    sf::Vector2f rnd;
 
     if (position) {
         // Use specified position
@@ -143,8 +150,15 @@ void Game::spawnBox(const sf::Vector2f *position)
         std::mt19937 gen(rd());
         std::uniform_real_distribution<> width(0, Constants::SCREEN_WIDTH);
         std::uniform_real_distribution<> height(0, Constants::SCREEN_HEIGHT);
+        std::uniform_real_distribution<> rdm(-100, 100);
         spawnPos = sf::Vector2f(width(gen), height(gen));
+        rnd = sf::Vector2f(rdm(gen), rdm(gen));
     }
 
-    m_entities.push_back(std::make_unique<Entity>(this, EntityType::TEST_BOX, spawnPos));
+    auto box = std::make_unique<Entity>(this, EntityType::TEST_BOX, spawnPos);
+    if (auto *kin = box->getComponent<KinematicsComponent>()) {
+        kin->mass = std::numeric_limits<float>::infinity();
+        kin->velocity = rnd;
+    }
+    m_entities.push_back(std::move(box));
 }
