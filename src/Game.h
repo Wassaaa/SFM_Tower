@@ -11,7 +11,7 @@
 #include "InputHandler.h"
 #include "Components/CollisionSystem.h"
 #include "Components/KinematicsSystem.h"
-#include "DebugRenderSystem.h"
+#include "RenderSystem.h"
 
 class Entity;
 class Game;
@@ -50,5 +50,5 @@ private:
     // Systems
     std::unique_ptr<CollisionSystem> m_collisionSystem;
     std::unique_ptr<KinematicsSystem> m_kinematicsSystem;
-    std::unique_ptr<DebugRenderSystem> m_debugRenderSystem;
+    std::unique_ptr<RenderSystem> m_renderSystem;
 };

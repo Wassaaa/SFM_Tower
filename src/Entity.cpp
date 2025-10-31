@@ -42,12 +42,8 @@ void Entity::initComponents()
         addComponent<CollisionComponent>(*collisionData);
     }
 
-    // refactor later
-    if (m_type != EntityType::TEST_BOX) {
-        if (auto *visualData = entityData.getComponent<VisualComponent>()) {
-            auto &visual = addComponent<VisualComponent>(*visualData);
-            visual.setPosition(m_initialPosition); // Temporary sync
-        }
+    if (auto *visualData = entityData.getComponent<VisualComponent>()) {
+        addComponent<VisualComponent>(*visualData);
     }
 
     // add others later

@@ -30,7 +30,7 @@ bool Game::initialise()
     // init systems
     m_collisionSystem = std::make_unique<CollisionSystem>();
     m_kinematicsSystem = std::make_unique<KinematicsSystem>();
-    m_debugRenderSystem = std::make_unique<DebugRenderSystem>();
+    m_renderSystem = std::make_unique<RenderSystem>();
 
     // Create a player controlled box
     auto playerEntity =
@@ -115,14 +115,8 @@ void Game::update(float deltaTime)
 
 void Game::draw(sf::RenderTarget &target, sf::RenderStates states) const
 {
-    for (const auto &entity : m_entities) {
-        if (entity->getType() != EntityType::TEST_BOX) {
-            // This uses the old VisualComponent draw for now
-            entity->draw(target, states);
-        }
-    }
 
-    m_debugRenderSystem->draw(target, states, m_entities, Constants::DEBUG_DRAW);
+    m_renderSystem->draw(target, states, m_entities);
 }
 
 void Game::onKeyPressed(sf::Keyboard::Key key)
