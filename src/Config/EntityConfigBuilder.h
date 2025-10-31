@@ -40,10 +40,8 @@ public:
     }
 
 private:
-    VisualComponentData m_visual{"", {1.f, 1.f}, {0.f, 0.f}, {0.f, 0.f}, 0.f};
-    CollisionComponentData m_collision{
-        CollisionShape::Polygon, 0.f, {}, {1.f, 1.f}, {0.f, 0.f}, {0.f, 0.f}, 0.f,
-        {255, 0, 0, 128}};
+    std::optional<VisualComponentData> m_visual;
+    std::optional<CollisionComponentData> m_collision;
     std::unordered_map<EntityState, AnimationInfo> m_animations;
     std::optional<WeaponComponentData> m_weapon;
     std::optional<KinematicsComponentData> m_kinematics;

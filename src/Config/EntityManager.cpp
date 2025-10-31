@@ -10,8 +10,10 @@ void EntityManager::loadEntityData()
 {
     for (const auto &[type, config] : Config::ENTITY_CONFIGS) {
         EntityData &entity = entityData[type];
-        entity.addComponent<VisualComponent>(config.visual);
-        entity.addComponent<CollisionComponent>(config.collision);
+        if (config.visual.has_value())
+            entity.addComponent<VisualComponent>(config.visual.value());
+        if (config.collision.has_value())
+            entity.addComponent<CollisionComponent>(config.collision.value());
 
         if (config.weapon.has_value())
             entity.addComponent<WeaponComponent>(config.weapon.value());

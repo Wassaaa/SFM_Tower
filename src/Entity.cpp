@@ -26,12 +26,14 @@ void Entity::initComponents()
     const EntityData &entityData = EntityManager::getInstance().getEntityData(m_type);
     const EntityConfig &config = Config::ENTITY_CONFIGS.at(m_type);
 
-    sf::Vector2f baseScale = config.visual.scale;
-    if (m_type == EntityType::TEST_BOX) {
-        baseScale = {1.f, 1.f};
+    sf::Vector2f baseScale{1, 1};
+    float rotation{0.f};
+    if (config.visual.has_value()) {
+        baseScale = config.visual.value().scale;
+        rotation = config.visual.value().rotation;
     }
 
-    auto &transform = addComponent<TransformComponent>(m_initialPosition, 0.f, baseScale);
+    auto &transform = addComponent<TransformComponent>(m_initialPosition, rotation, baseScale);
 
     if (auto *kinematicsData = entityData.getComponent<KinematicsComponent>()) {
         auto &kinematics = addComponent<KinematicsComponent>(*kinematicsData);

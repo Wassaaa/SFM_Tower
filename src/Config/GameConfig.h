@@ -121,8 +121,8 @@ struct KinematicsComponentData
 
 struct EntityConfig
 {
-    VisualComponentData visual;
-    CollisionComponentData collision;
+    std::optional<VisualComponentData> visual;
+    std::optional<CollisionComponentData> collision;
     std::unordered_map<EntityState, AnimationInfo> animations;
     std::optional<WeaponComponentData> weapon;
     std::optional<KinematicsComponentData> kinematics;
