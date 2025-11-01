@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
                 break;
             }
         }
-        pGame->update(clock.restart().asSeconds());
+        pGame->update(clock.restart().asSeconds(), window);
 
         // clear the window with black color
         window.clear(sf::Color::Black);

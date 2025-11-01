@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SFML/Window/Keyboard.hpp>
+#include <SFML/Graphics.hpp>
 
 struct InputState
 {
@@ -14,6 +15,9 @@ struct InputState
     bool action1 = false;
     bool action1Released = true;
     bool spawnBox = false;
+
+    // Mouse
+    sf::Vector2f mouseWorldPosition{0.f, 0.f};
 
     bool hasMovementInput() const { return moveUp || moveDown || moveLeft || moveRight; }
 };

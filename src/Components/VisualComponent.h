@@ -32,6 +32,9 @@ public:
         target.draw(m_sprite, states);
     }
     void setTextureRect(const sf::IntRect &rect) { m_sprite.setTextureRect(rect); }
+    void setScale(const sf::Vector2f &scale) { m_sprite.setScale(scale); }
+    const sf::Vector2f &getScale() const { return m_sprite.getScale(); }
+
     virtual const char *getName() const override { return "VisualComponent"; }
 
 private:

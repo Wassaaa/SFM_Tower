@@ -50,6 +50,8 @@ public:
         }
     }
 
+    sf::Shape *getDebugShape() const { return m_debugShape.get(); }
+
     virtual const char *getName() const override { return "CollisionComponent"; }
 
 private:

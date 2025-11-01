@@ -36,11 +36,17 @@ bool Game::initialise()
     // Create a player controlled box
     auto playerEntity =
         std::make_unique<Entity>(this, EntityType::PLAYER, sf::Vector2f(200.f, 200.f));
+
     // playerEntity->setMass(10.f);
     // auto playerEntity =
     //     std::make_unique<Entity>(this, EntityType::TEST_BOX, sf::Vector2f(200.f, 200.f));
     // playerEntity->setMass(std::numeric_limits<float>::infinity());
     m_pPlayerEntity = playerEntity.get();
+
+    if (auto *kin = m_pPlayerEntity->getComponent<KinematicsComponent>()) {
+        kin->behavior = kin->behavior | KinematicsBehavior::FaceTarget;
+        kin->angularVelocity = 720.f;
+    }
 
     m_entities.push_back(std::move(playerEntity));
 
@@ -88,7 +94,7 @@ void Game::createBoundaryWalls()
     m_entities.push_back(std::move(rightWall));
 }
 
-void Game::update(float deltaTime)
+void Game::update(float deltaTime, sf::RenderWindow &window)
 {
     // Cap deltaTime
     deltaTime = std::min(deltaTime, 0.1f);
@@ -102,8 +108,15 @@ void Game::update(float deltaTime)
             input.spawnBox = false;
         }
 
+        sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
+        sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
+        input.mouseWorldPosition = worldPos;
+
         if (m_pPlayerEntity) {
             m_pPlayerEntity->handleInput(deltaTime, input);
+            if (auto *kin = m_pPlayerEntity->getComponent<KinematicsComponent>()) {
+                kin->targetPoint = &input.mouseWorldPosition;
+            }
         }
 
         // Run logic systems

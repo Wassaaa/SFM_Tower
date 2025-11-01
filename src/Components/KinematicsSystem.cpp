@@ -2,6 +2,7 @@
 #include "../Entity.h"
 #include "KinematicsComponent.h"
 #include "TransformComponent.h"
+#include "DirectionComponent.h"
 #include "../MathUtils.h"
 
 void KinematicsSystem::update(float dt, std::vector<std::unique_ptr<Entity>> &entities)
@@ -9,6 +10,7 @@ void KinematicsSystem::update(float dt, std::vector<std::unique_ptr<Entity>> &en
     for (auto &entity : entities) {
         auto *kinematics = entity->getComponent<KinematicsComponent>();
         auto *transform = entity->getComponent<TransformComponent>();
+        auto *dir = entity->getComponent<DirectionComponent>();
 
         if (!kinematics || !transform || !kinematics->isEnabled() || !transform->isEnabled())
             continue;
@@ -61,6 +63,44 @@ void KinematicsSystem::update(float dt, std::vector<std::unique_ptr<Entity>> &en
                 1.f + kinematics->pulseAmplitude *
                           std::sin(kinematics->currentTime * kinematics->pulseFrequency);
             transform->scale = kinematics->baseScale * pulseMultiplier;
+        }
+        // Face Target
+        if (hasFlag(kinematics->behavior, KinematicsBehavior::FaceTarget) &&
+            kinematics->targetPoint) {
+            // Find the target angle
+            sf::Vector2f diff = *kinematics->targetPoint - transform->position;
+            float targetAngle = ToDegrees(std::atan2(diff.y, diff.x));
+
+            // Find the shortest angle to turn
+            float currentAngle = transform->rotation;
+            float angleDiff = targetAngle - currentAngle;
+
+            // Normalize angle diff to be between -180 and 180
+            while (angleDiff > 180.f) angleDiff -= 360.f;
+            while (angleDiff < -180.f) angleDiff += 360.f;
+
+            // Apply turn speed (angularVelocity)
+            float turnSpeed = kinematics->angularVelocity * dt;
+
+            if (std::abs(angleDiff) < turnSpeed) {
+                // Snap to target
+                transform->rotation = targetAngle;
+            }
+            else if (angleDiff > 0.f) {
+                // Turn counter-clockwise
+                transform->rotation += turnSpeed;
+            }
+            else {
+                // Turn clockwise
+                transform->rotation -= turnSpeed;
+            }
+        }
+        // Fallback Simple L/R facing
+        else if (dir) {
+            if (kinematics->velocity.x > EPSILON)
+                dir->faceRight();
+            else if (kinematics->velocity.x < -EPSILON)
+                dir->faceLeft();
         }
     }
 }

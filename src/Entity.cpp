@@ -46,6 +46,7 @@ void Entity::initComponents()
 
     if (auto *visualData = entityData.getComponent<VisualComponent>()) {
         addComponent<VisualComponent>(*visualData);
+        addComponent<DirectionComponent>();
     }
 
     if (!config.animations.empty()) {
@@ -78,7 +79,8 @@ void Entity::setPosition(const sf::Vector2f &pos)
 void Entity::handleInput(float deltaTime, const InputState &input)
 {
     // This now writes acceleration data to the component.
-    if (auto *kinematics = getComponent<KinematicsComponent>()) {
+    auto *kinematics = getComponent<KinematicsComponent>();
+    if (kinematics) {
         sf::Vector2f acceleration(0.f, 0.f);
         const float accelerationForce = 1500.f; // Acceleration force
 
@@ -102,12 +104,10 @@ void Entity::handleInput(float deltaTime, const InputState &input)
     }
 
     if (auto *anim = getComponent<AnimationComponent>()) {
-        if (input.hasMovementInput()) {
+        if (kinematics->velocity.x != 0)
             anim->requestedState = EntityState::MOVE_RIGHT;
-        }
-        else {
+        else
             anim->requestedState = EntityState::IDLE;
-        }
     }
 }
 
@@ -165,33 +165,3 @@ void Entity::applyCollisionImpulse(const sf::Vector2f &velocityChange)
         kinematics->velocity += velocityChange;
     }
 }
-
-// void Entity::updateAnimationAndVisual(float dt)
-// {
-//     // Update animation state
-//     if (auto *anim = getComponent<AnimationComponent>()) {
-//         anim->update(dt);
-
-//         // Apply animation frame to visual
-//         if (auto *visual = getComponent<VisualComponent>()) {
-//             visual->setTextureRect(anim->getCurrentFrame());
-//         }
-//     }
-
-//     // Apply direction flipping to visual
-//     if (auto *visual = getComponent<VisualComponent>()) {
-//         if (auto *direction = getComponent<DirectionComponent>()) {
-//             sf::Vector2f scale = visual->getScale();
-//             float absScaleX = std::abs(scale.x);
-
-//             if (direction->isFacingLeft()) {
-//                 if (scale.x > 0)
-//                     visual->setScale(-absScaleX, scale.y);
-//             }
-//             else {
-//                 if (scale.x < 0)
-//                     visual->setScale(absScaleX, scale.y);
-//             }
-//         }
-//     }
-// }

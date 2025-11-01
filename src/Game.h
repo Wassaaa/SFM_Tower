@@ -24,7 +24,7 @@ public:
     ~Game();
 
     bool initialise();
-    void update(float deltaTime);
+    void update(float deltaTime, sf::RenderWindow &window);
     void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
 
     GameState getState() const { return m_state; }

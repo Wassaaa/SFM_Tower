@@ -14,7 +14,8 @@ enum class KinematicsBehavior : uint32_t
     Orbital = 1 << 3,    // Circle around point
     Rotating = 1 << 4,   // Rotate over time (was Sweeping)
     Extending = 1 << 5,  // Scale over time (lasers)
-    Pulsing = 1 << 6     // Scale up/down repeatedly
+    Pulsing = 1 << 6,    // Scale up/down repeatedly
+    FaceTarget = 1 << 7  // Always keep facing the target
 };
 
 // Weapon behavior types

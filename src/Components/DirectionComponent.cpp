@@ -1,4 +1,5 @@
 #include "DirectionComponent.h"
+#include "../MathUtils.h"
 #include <cmath>
 
 DirectionComponent::DirectionComponent(FacingDirection initialDirection)
@@ -37,9 +38,9 @@ void DirectionComponent::faceLeft()
 
 void DirectionComponent::updateFromVelocity(const sf::Vector2f &velocity)
 {
-    if (velocity.x > 0.1f)
+    if (velocity.x > EPSILON)
         m_facing = FacingDirection::RIGHT;
-    else if (velocity.x < -0.1f)
+    else if (velocity.x < -EPSILON)
         m_facing = FacingDirection::LEFT;
     // If velocity.x is ~0, keep current facing
 }
@@ -48,8 +49,8 @@ void DirectionComponent::updateFromTarget(const sf::Vector2f &currentPos,
                                           const sf::Vector2f &targetPos)
 {
     float dx = targetPos.x - currentPos.x;
-    if (dx > 0.1f)
+    if (dx > EPSILON)
         m_facing = FacingDirection::RIGHT;
-    else if (dx < -0.1f)
+    else if (dx < -EPSILON)
         m_facing = FacingDirection::LEFT;
 }
