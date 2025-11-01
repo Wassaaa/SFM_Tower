@@ -107,7 +107,7 @@ void Game::update(float deltaTime)
 
         // Run logic systems
         m_kinematicsSystem->update(deltaTime, m_entities);
-        m_collisionSystem->update(m_entities, deltaTime);
+        m_collisionSystem->update(deltaTime, m_entities);
 
         // AnimationSystem, etc
     } break;

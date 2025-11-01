@@ -8,7 +8,7 @@
 #include <cmath>
 #include <iostream>
 
-void CollisionSystem::update(std::vector<std::unique_ptr<Entity>> &entities, float deltaTime)
+void CollisionSystem::update(float deltaTime, std::vector<std::unique_ptr<Entity>> &entities)
 {
     // Reset collision state for all entities
     for (auto &entity : entities) {

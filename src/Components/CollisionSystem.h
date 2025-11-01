@@ -16,7 +16,7 @@ public:
     ~CollisionSystem() = default;
 
     // Main update loop
-    void update(std::vector<std::unique_ptr<Entity>> &entities, float deltaTime);
+    void update(float deltaTime, std::vector<std::unique_ptr<Entity>> &entities);
 
 private:
     // Collision resolution logic
