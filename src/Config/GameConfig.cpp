@@ -9,7 +9,7 @@ namespace Config {
         EntityConfigBuilder()
             .setVisual(VisualDataBuilder()
                            .setFilename("soldier.png")
-                           .setScale({3.f, 3.f})
+                           .setScale({2.f, 2.f})
                            .setOrigin({50.f, 50.f})
                            .build())
             .setKinematics(KinematicsDataBuilder()
@@ -20,9 +20,19 @@ namespace Config {
                                .setBehavior(KinematicsBehavior::Accelerate)
                                .build())
             .setCollision(CollisionDataBuilder()
-                              .setBox({50.f, 55.f})
+                              // .setBox({50.f, 55.f})
+                              // .setCircle(25.f)
+                              .setPolygon({
+                                  {45.f, 28.f}, // Left top of helmet
+                                  {55.f, 28.f}, // Right top of helmet
+                                  {65.f, 45.f}, // Tip of right hand
+                                  {60.f, 48.f}, // Left of right hand
+                                  {60.f, 65.f}, // Right foot
+                                  {40.f, 65.f}, // Left foot
+                                  {35.f, 45.f}  // Left shoulder
+                              })
                               .setScale({1.f, 1.f})
-                              .setOrigin({25.f, 30.f})
+                              .setOrigin({50.f, 50.f})
                               .setDebugColor({0, 255, 0, 128})
                               .build())
             .addAnimation(EntityState::IDLE, AnimationInfoBuilder()
@@ -35,6 +45,7 @@ namespace Config {
             .addAnimation(EntityState::MOVE_RIGHT, AnimationInfoBuilder()
                                                        .setFrameSize({100, 100})
                                                        .setStartPos({0, 1})
+                                                       //  .setStartPos({0, 4})
                                                        .setFrameCount(8)
                                                        .setFrameDuration(sf::milliseconds(100))
                                                        .setLoop(true)

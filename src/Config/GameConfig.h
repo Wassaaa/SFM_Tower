@@ -52,8 +52,8 @@ enum class CollisionShape
 struct CollisionResult
 {
     bool intersects;
-    sf::Vector2f normal; // Direction to push objects apart
-    float depth;         // How deep the intersection is
+    sf::Vector2f normal;
+    float depth;
 };
 
 // Data structures for component configurations
@@ -71,7 +71,7 @@ struct CollisionComponentData
     CollisionShape type;
 
     // For circles:
-    float radius; // Only used if type == Circle
+    float radius;
 
     // For polygons:
     std::vector<sf::Vector2f> points; // Local space points
