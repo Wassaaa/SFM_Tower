@@ -48,6 +48,13 @@ void Entity::initComponents()
         addComponent<VisualComponent>(*visualData);
     }
 
+    if (!config.animations.empty()) {
+        auto &animComponent = addComponent<AnimationComponent>();
+        for (const auto &[state, animInfo] : config.animations) {
+            animComponent.addAnimation(state, animInfo);
+        }
+    }
+
     // add others later
 }
 
@@ -92,6 +99,15 @@ void Entity::handleInput(float deltaTime, const InputState &input)
         }
 
         kinematics->acceleration = acceleration;
+    }
+
+    if (auto *anim = getComponent<AnimationComponent>()) {
+        if (input.hasMovementInput()) {
+            anim->requestedState = EntityState::MOVE_RIGHT;
+        }
+        else {
+            anim->requestedState = EntityState::IDLE;
+        }
     }
 }
 

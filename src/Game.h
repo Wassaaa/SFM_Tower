@@ -11,6 +11,7 @@
 #include "InputHandler.h"
 #include "Components/CollisionSystem.h"
 #include "Components/KinematicsSystem.h"
+#include "Components/AnimationSystem.h"
 #include "RenderSystem.h"
 
 class Entity;
@@ -51,4 +52,5 @@ private:
     std::unique_ptr<CollisionSystem> m_collisionSystem;
     std::unique_ptr<KinematicsSystem> m_kinematicsSystem;
     std::unique_ptr<RenderSystem> m_renderSystem;
+    std::unique_ptr<AnimationSystem> m_animationSystem;
 };

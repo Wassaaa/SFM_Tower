@@ -31,10 +31,11 @@ bool Game::initialise()
     m_collisionSystem = std::make_unique<CollisionSystem>();
     m_kinematicsSystem = std::make_unique<KinematicsSystem>();
     m_renderSystem = std::make_unique<RenderSystem>();
+    m_animationSystem = std::make_unique<AnimationSystem>();
 
     // Create a player controlled box
     auto playerEntity =
-        std::make_unique<Entity>(this, EntityType::TOWER, sf::Vector2f(200.f, 200.f));
+        std::make_unique<Entity>(this, EntityType::PLAYER, sf::Vector2f(200.f, 200.f));
     // playerEntity->setMass(10.f);
     // auto playerEntity =
     //     std::make_unique<Entity>(this, EntityType::TEST_BOX, sf::Vector2f(200.f, 200.f));
@@ -108,8 +109,7 @@ void Game::update(float deltaTime)
         // Run logic systems
         m_kinematicsSystem->update(deltaTime, m_entities);
         m_collisionSystem->update(deltaTime, m_entities);
-
-        // AnimationSystem, etc
+        m_animationSystem->update(deltaTime, m_entities);
     } break;
 
     case GameState::WAITING:
