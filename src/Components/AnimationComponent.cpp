@@ -8,8 +8,9 @@ void AnimationComponent::addAnimation(EntityState state, const AnimationInfo &an
         it->second.loop = animInfo.loop;
 
         for (size_t i = 0; i < animInfo.frameCount; i++) {
-            sf::IntRect frame(animInfo.startPos.x + i * animInfo.frameSize.x, animInfo.startPos.y,
-                              animInfo.frameSize.x, animInfo.frameSize.y);
+            sf::IntRect frame(animInfo.startPos.x + i * animInfo.frameSize.x,
+                              animInfo.startPos.y * animInfo.frameSize.y, animInfo.frameSize.x,
+                              animInfo.frameSize.y);
             it->second.frames.emplace_back(frame);
         }
     }

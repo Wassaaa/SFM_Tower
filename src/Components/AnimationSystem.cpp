@@ -20,8 +20,14 @@ void AnimationSystem::update(float dt, std::vector<std::unique_ptr<Entity>> &ent
 
 void AnimationSystem::handleStateTransition(AnimationComponent *anim) const
 {
-    bool canChange = true;
+    if (anim->requestedState == EntityState::NOTHING ||
+        anim->requestedState == anim->currentState) {
 
+        anim->requestedState = EntityState::NOTHING;
+        return;
+    }
+
+    bool canChange = true;
     if (anim->currentState != EntityState::NOTHING && anim->animations.count(anim->currentState)) {
         const auto &currentAnimData = anim->animations.at(anim->currentState);
         // not interrupting non-looping animations
