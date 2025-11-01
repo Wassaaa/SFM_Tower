@@ -535,11 +535,3 @@ CollisionResult CollisionSystem::polygonPolygonCollision(const CollisionComponen
 
     return result;
 }
-
-// ... (Implementations for circleCircleCollision, circlePolygonCollision,
-//      polygonPolygonCollision, projectOntoAxis, hasSeparatingAxis,
-//      handleStaticDynamicCollision, handleDynamicDynamicCollision) ...
-//
-// (These are large blocks of math logic. You can copy-paste them
-// directly from your old CollisionComponent.cpp and adapt them to
-// take the components as parameters, just like we did with getBounds/getCenter)

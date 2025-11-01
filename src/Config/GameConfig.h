@@ -95,11 +95,10 @@ struct AnimationInfo
 
 struct WeaponComponentData
 {
-    float baseDamage;
-    float basePiercing;
+    float damage;
+    int piercing;
     int maxHits;    // -1 for unlimited (beams)
     float lifetime; // 0 for infinite
-    float radius;
     WeaponBehavior behavior;
 };
 

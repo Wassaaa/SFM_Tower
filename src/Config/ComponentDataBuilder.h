@@ -153,14 +153,14 @@ private:
 class WeaponDataBuilder
 {
 public:
-    WeaponDataBuilder &setBaseDamage(float damage)
+    WeaponDataBuilder &setDamage(float damage)
     {
-        m_baseDamage = damage;
+        m_damage = damage;
         return *this;
     }
-    WeaponDataBuilder &setBasePiercing(float piercing)
+    WeaponDataBuilder &setPiercing(int piercing)
     {
-        m_basePiercing = piercing;
+        m_piercing = piercing;
         return *this;
     }
     WeaponDataBuilder &setMaxHits(int hits)
@@ -173,11 +173,6 @@ public:
         m_lifetime = lifetime;
         return *this;
     }
-    WeaponDataBuilder &setRadius(float radius)
-    {
-        m_radius = radius;
-        return *this;
-    }
     WeaponDataBuilder &setBehavior(WeaponBehavior behavior)
     {
         m_behavior = behavior;
@@ -185,15 +180,14 @@ public:
     }
     WeaponComponentData build() const
     {
-        return {m_baseDamage, m_basePiercing, m_maxHits, m_lifetime, m_radius, m_behavior};
+        return {m_damage, m_piercing, m_maxHits, m_lifetime, m_behavior};
     }
 
 private:
-    float m_baseDamage{0.f};
-    float m_basePiercing{0.f};
+    float m_damage{0.f};
+    int m_piercing{0};
     int m_maxHits{1};
     float m_lifetime{0.f};
-    float m_radius{0.f};
     WeaponBehavior m_behavior{WeaponBehavior::None};
 };
 
