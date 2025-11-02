@@ -258,16 +258,22 @@ void CollisionSystem::handleCollision(Entity *entityA, Entity *entityB, const sf
         return;
 
     // Calculate inverse masses
-    float invMassA = (kinA->mass == 0.f || std::isinf(kinA->mass)) ? 0.f : 1.f / kinA->mass;
-    float invMassB = (kinB->mass == 0.f || std::isinf(kinB->mass)) ? 0.f : 1.f / kinB->mass;
+    float invMassA = 0.f;
+    float invMassB = 0.f;
+    if ((kinA->mass != 0.f && !std::isinf(kinA->mass))) {
+        invMassA = 1.f / kinA->mass;
+    }
+    if ((kinB->mass != 0.f && !std::isinf(kinB->mass))) {
+        invMassB = 1.f / kinB->mass;
+    }
     float totalInvMass = invMassA + invMassB;
 
-    // If both objects have infinite mass (invMass == 0), they can't move.
+    // both infinite mass, cant move
     if (totalInvMass < EPSILON) {
         return;
     }
 
-    // --- 1. Impulse Resolution (Handle Bouncing) ---
+    // calc impulse
     sf::Vector2f velA = kinA->velocity;
     sf::Vector2f velB = kinB->velocity;
     sf::Vector2f relativeVel = velB - velA;
@@ -275,30 +281,25 @@ void CollisionSystem::handleCollision(Entity *entityA, Entity *entityB, const sf
     // Calculate velocity along the normal
     float velAlongNormal = DotProduct(relativeVel, normal);
 
-    // Do not apply impulse if velocities are already separating
-    if (velAlongNormal < 0.f) {
-        // Combine restitution (e.g., use the minimum of the two)
-        float e = std::min(kinA->restitution, kinB->restitution);
+    bool approaching = velAlongNormal < 0.f;
+    if (approaching) {
+        float combinedRestitution = std::min(kinA->restitution, kinB->restitution);
 
         // Calculate impulse scalar (j)
-        float j = -(1.f + e) * velAlongNormal;
+        float j = -(1.f + combinedRestitution) * velAlongNormal;
         j /= totalInvMass;
 
-        // Apply impulse (j * normal) scaled by inverse mass
         sf::Vector2f impulse = j * normal;
         entityA->applyCollisionImpulse(-impulse * invMassA);
         entityB->applyCollisionImpulse(impulse * invMassB);
     }
 
-    // --- 2. Positional Correction (Handle Sinking) ---
-    // This pushes objects apart based on their mass.
-    const float percent = 0.4f;
-    const float slop = 0.01f; // How much penetration to allow
+    // Push objects apart based on their mass.
+    const float percent = 0.5f;
+    const float slop = 0.1f; // How much penetration to allow
 
-    sf::Vector2f correction = std::max(depth - slop, 0.f) / (totalInvMass)*percent * normal;
+    sf::Vector2f correction = std::max(depth - slop, 0.f) / totalInvMass * percent * normal;
 
-    // Apply correction scaled by inverse mass
-    // The infinite-mass object (invMass=0) will not move.
     entityA->resolveCollision(-correction * invMassA);
     entityB->resolveCollision(correction * invMassB);
 }
