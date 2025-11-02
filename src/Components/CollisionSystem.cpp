@@ -53,25 +53,7 @@ void CollisionSystem::update(float deltaTime, std::vector<std::unique_ptr<Entity
                 collision1->isColliding = true;
                 collision2->isColliding = true;
 
-                float mass1 = kin1 ? kin1->mass : std::numeric_limits<float>::infinity();
-                float mass2 = kin2 ? kin2->mass : std::numeric_limits<float>::infinity();
-
-                if (std::isinf(mass1) && std::isinf(mass2)) {
-                    handleStaticStaticCollision(entities[i].get(), entities[j].get(), result.normal,
-                                                result.depth);
-                }
-                else if (std::isinf(mass1)) {
-                    handleStaticDynamicCollision(entities[i].get(), entities[j].get(),
-                                                 result.normal, result.depth);
-                }
-                else if (std::isinf(mass2)) {
-                    handleStaticDynamicCollision(entities[j].get(), entities[i].get(),
-                                                 -result.normal, result.depth);
-                }
-                else {
-                    handleDynamicDynamicCollision(entities[i].get(), entities[j].get(),
-                                                  result.normal, result.depth);
-                }
+                handleCollision(entities[i].get(), entities[j].get(), result.normal, result.depth);
             }
         }
     }
@@ -260,67 +242,14 @@ void CollisionSystem::processCombat(Entity *entityA, Entity *entityB)
 }
 
 /**
- * @brief Resolves a collision between a static and a dynamic entity.
- * @param staticEntity The static (immovable) entity.
- * @param dynamicEntity The dynamic (movable) entity to be pushed.
- * @param normal The collision normal, MUST point AWAY from the static entity
- * and TOWARDS the dynamic entity.
- * @param depth The penetration depth.
- */
-void CollisionSystem::handleStaticDynamicCollision(Entity *staticEntity, Entity *dynamicEntity,
-                                                   const sf::Vector2f &normal, float depth)
-{
-    auto *kin = dynamicEntity->getComponent<KinematicsComponent>();
-    if (!kin)
-        return;
-
-    sf::Vector2f velocity = kin->velocity;
-    float velAlongNormal = DotProduct(velocity, normal);
-
-    // Apply impulse if approaching
-    if (velAlongNormal < EPSILON) {
-        float impulseMagnitude = -(1.f + kin->restitution) * velAlongNormal;
-        sf::Vector2f impulse = normal * impulseMagnitude;
-        dynamicEntity->applyCollisionImpulse(impulse);
-    }
-
-    sf::Vector2f pushVector = normal * depth * 1.2f;
-    dynamicEntity->resolveCollision(pushVector);
-}
-
-void CollisionSystem::handleStaticStaticCollision(Entity *entityA, Entity *entityB,
-                                                  const sf::Vector2f &normal, float depth)
-{
-    auto *kinA = entityA->getComponent<KinematicsComponent>();
-    auto *kinB = entityB->getComponent<KinematicsComponent>();
-
-    if (!kinA || !kinB)
-        return;
-
-    // both pure static, do nothing, shouldn't happen
-    if (kinA->isStatic && kinB->isStatic)
-        return;
-
-    // both infinite mass, no pure static
-    if (!kinA->isStatic && !kinB->isStatic)
-        return handleDynamicDynamicCollision(entityA, entityB, normal, depth);
-
-    // one pure static, one infinite mass
-    if (kinA->isStatic)
-        return handleStaticDynamicCollision(entityA, entityB, normal, depth);
-    if (kinB->isStatic)
-        return handleStaticDynamicCollision(entityB, entityA, -normal, depth);
-}
-
-/**
- * @brief Resolves a collision between a dynamic entities.
- * @param entityA The static (immovable) entity.
- * @param entityB The dynamic (movable) entity to be pushed.
+ * @brief Resolves a collision between ANY two entities using impulse and positional correction.
+ * @param entityA Entity A
+ * @param entityB Entity B
  * @param normal The collision normal, MUST point from entityA TO entityB.
  * @param depth The penetration depth.
  */
-void CollisionSystem::handleDynamicDynamicCollision(Entity *entityA, Entity *entityB,
-                                                    const sf::Vector2f &normal, float depth)
+void CollisionSystem::handleCollision(Entity *entityA, Entity *entityB, const sf::Vector2f &normal,
+                                      float depth)
 {
     auto *kinA = entityA->getComponent<KinematicsComponent>();
     auto *kinB = entityB->getComponent<KinematicsComponent>();
@@ -328,43 +257,50 @@ void CollisionSystem::handleDynamicDynamicCollision(Entity *entityA, Entity *ent
     if (!kinA || !kinB)
         return;
 
-    float massA = kinA->mass;
-    float massB = kinB->mass;
-    if (massA == std::numeric_limits<float>::infinity() &&
-        massB == std::numeric_limits<float>::infinity()) {
-        massA = 1.f;
-        massB = 1.f;
-    }
-    float totalMass = massA + massB;
+    // Calculate inverse masses
+    float invMassA = (kinA->mass == 0.f || std::isinf(kinA->mass)) ? 0.f : 1.f / kinA->mass;
+    float invMassB = (kinB->mass == 0.f || std::isinf(kinB->mass)) ? 0.f : 1.f / kinB->mass;
+    float totalInvMass = invMassA + invMassB;
 
-    // Get relative velocity along collision normal
+    // If both objects have infinite mass (invMass == 0), they can't move.
+    if (totalInvMass < EPSILON) {
+        return;
+    }
+
+    // --- 1. Impulse Resolution (Handle Bouncing) ---
     sf::Vector2f velA = kinA->velocity;
     sf::Vector2f velB = kinB->velocity;
-    sf::Vector2f relativeVel = velA - velB;
+    sf::Vector2f relativeVel = velB - velA;
 
-    // Calculate velocity along normal (dot product)
-    // Normal points from entityA -> entityB, so positive velAlongNormal means approaching
+    // Calculate velocity along the normal
     float velAlongNormal = DotProduct(relativeVel, normal);
 
-    // Apply impulse if approaching OR resting
-    if (velAlongNormal > -EPSILON) {
-        // Calculate impulse with baseline push to handle resting contacts
-        float impulseMagnitude = (velAlongNormal + EPSILON) / totalMass;
-        sf::Vector2f impulse = normal * impulseMagnitude;
+    // Do not apply impulse if velocities are already separating
+    if (velAlongNormal < 0.f) {
+        // Combine restitution (e.g., use the minimum of the two)
+        float e = std::min(kinA->restitution, kinB->restitution);
 
-        // Apply impulse proportional to mass
-        entityA->applyCollisionImpulse(-impulse * massB);
-        entityB->applyCollisionImpulse(impulse * massA);
+        // Calculate impulse scalar (j)
+        float j = -(1.f + e) * velAlongNormal;
+        j /= totalInvMass;
+
+        // Apply impulse (j * normal) scaled by inverse mass
+        sf::Vector2f impulse = j * normal;
+        entityA->applyCollisionImpulse(-impulse * invMassA);
+        entityB->applyCollisionImpulse(impulse * invMassB);
     }
 
-    // Positional correction split by mass ratio
-    float ratioA = massA / totalMass;
-    float ratioB = massB / totalMass;
-    sf::Vector2f separationA = -normal * depth * ratioA;
-    sf::Vector2f separationB = normal * depth * ratioB;
+    // --- 2. Positional Correction (Handle Sinking) ---
+    // This pushes objects apart based on their mass.
+    const float percent = 0.4f;
+    const float slop = 0.01f; // How much penetration to allow
 
-    entityA->resolveCollision(separationA);
-    entityB->resolveCollision(separationB);
+    sf::Vector2f correction = std::max(depth - slop, 0.f) / (totalInvMass)*percent * normal;
+
+    // Apply correction scaled by inverse mass
+    // The infinite-mass object (invMass=0) will not move.
+    entityA->resolveCollision(-correction * invMassA);
+    entityB->resolveCollision(correction * invMassB);
 }
 
 CollisionResult CollisionSystem::checkCollision(const CollisionComponent &colA,

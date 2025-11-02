@@ -23,12 +23,7 @@ private:
     void processCombat(Entity *entityA, Entity *entityB);
     bool skipPhysics{false};
     // Collision resolution logic
-    void handleStaticDynamicCollision(Entity *staticEntity, Entity *dynamicEntity,
-                                      const sf::Vector2f &normal, float depth);
-    void handleDynamicDynamicCollision(Entity *entity1, Entity *entity2, const sf::Vector2f &normal,
-                                       float depth);
-    void handleStaticStaticCollision(Entity *entityA, Entity *entityB, const sf::Vector2f &normal,
-                                     float depth);
+    void handleCollision(Entity *entityA, Entity *entityB, const sf::Vector2f &normal, float depth);
 
     // Main check function
     CollisionResult checkCollision(const CollisionComponent &colA, const TransformComponent &transA,
