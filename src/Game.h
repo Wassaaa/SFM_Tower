@@ -41,6 +41,7 @@ public:
 private:
     std::vector<std::unique_ptr<Entity>> m_entities;
     Entity *m_pPlayerEntity;
+    Entity *m_pPlayerWeapon{nullptr};
 
     GameState m_state;
     std::unique_ptr<sf::Clock> m_pClock;

@@ -21,6 +21,6 @@ namespace Constants {
     // Wall
     constexpr float WALL_THICKNESS = 500.f;
 
-    constexpr float SLOP = 2.f;
-    constexpr float CORRECTION_PER_FRAME = .5f; // percent
+    constexpr float SLOP = 0.2f;
+    constexpr float CORRECTION_PER_FRAME = 0.9f; // percent
 } // namespace Constants

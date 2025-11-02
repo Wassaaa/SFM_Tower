@@ -21,9 +21,8 @@ void KinematicsSystem::update(float dt, std::vector<std::unique_ptr<Entity>> &en
 
         kinematics->lastPosition = transform->position;
         kinematics->teleported = false;
-        kinematics->isGrounded = false;
 
-        // Accelerate, Drag, Homing
+        // Gravity, Accelerate, Drag, Homing
         handleVelocity(dt, kinematics);
         // 1. Attached, 2. Orbital, 3. Velocity movement Linear|Accelerate|Homing
         handlePosition(dt, kinematics, transform, entity.get());
@@ -44,7 +43,16 @@ void KinematicsSystem::handleVelocity(float dt, KinematicsComponent *kinematics)
 {
     // Gravity
     if (kinematics->mass != 0.f && !std::isinf(kinematics->mass)) {
-        kinematics->acceleration += kinematics->gravity;
+        if (kinematics->isGrounded) {
+            // If grounded, stop any downward velocity
+            if (kinematics->velocity.y > 0) {
+                kinematics->velocity.y = 0;
+            }
+        }
+        else {
+            // If airborne, apply gravity
+            kinematics->acceleration += kinematics->gravity;
+        }
     }
 
     // Accelerate
@@ -108,17 +116,20 @@ void KinematicsSystem::handleFacingDirection(KinematicsComponent *kinematics,
     if (!dir) {
         return;
     }
-
-    // Priority 1: Match Owner's Facing (if Attached)
-    if (hasFlag(kinematics->behavior, KinematicsBehavior::Attached)) {
+    // Priortiy 1, FaceTarget override all
+    if (hasFlag(kinematics->behavior, KinematicsBehavior::FaceTarget)) {
+        dir->faceRight();
+    }
+    // Priority 2: Match Owner's Facing (if Attached)
+    else if (hasFlag(kinematics->behavior, KinematicsBehavior::Attached)) {
         if (auto *owner = entity->getComponent<OwnerComponent>()) {
             if (auto *ownerDir = owner->owner->getComponent<DirectionComponent>()) {
                 dir->setFacing(ownerDir->getFacing());
             }
         }
     }
-    // Priority 2: Face Velocity
-    else if (!hasFlag(kinematics->behavior, KinematicsBehavior::FaceTarget)) {
+    // Priority 3: Face Velocity
+    else {
         if (kinematics->velocity.x > EPSILON)
             dir->faceRight();
         else if (kinematics->velocity.x < -EPSILON)
@@ -139,10 +150,18 @@ void KinematicsSystem::handleRotation(float dt, KinematicsComponent *kinematics,
                                       TransformComponent *transform, Entity *entity)
 {
     // Priority 1: Face Target (Overrides other rotation)
-    if (hasFlag(kinematics->behavior, KinematicsBehavior::FaceTarget) && kinematics->targetPoint) {
+    if (hasFlag(kinematics->behavior, KinematicsBehavior::FaceTarget) && kinematics->aimPoint) {
         // Find the target angle
-        sf::Vector2f diff = *kinematics->targetPoint - transform->position;
+        sf::Vector2f diff = *kinematics->aimPoint - transform->position;
         float targetAngle = ToDegrees(std::atan2(diff.y, diff.x));
+        if (targetAngle > 90.f || targetAngle < -90.f) {
+            // Aiming left, flip sprite vertically
+            transform->scale.y = -kinematics->baseScale.y;
+        }
+        else {
+            // Aiming right, use normal scale
+            transform->scale.y = kinematics->baseScale.y;
+        }
 
         // Find the shortest angle to turn
         float currentAngle = transform->rotation;

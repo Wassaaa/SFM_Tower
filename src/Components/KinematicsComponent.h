@@ -24,6 +24,7 @@ public:
 
     // calculated runtime state
     sf::Vector2f *targetPoint{nullptr};
+    sf::Vector2f *aimPoint{nullptr};
     float orbitAngle{0.f};
     float currentTime{0.f};
     sf::Vector2f baseScale{1.f, 1.f};

@@ -19,6 +19,7 @@ namespace Config {
                                .setMass(62.f)
                                .setRestition(0.1)
                                .setBehavior(KinematicsBehavior::Accelerate)
+                               .setAngularVelocity(500.f)
                                .build())
             .setCollision(CollisionDataBuilder()
                               // .setBox({50.f, 55.f})
@@ -92,39 +93,8 @@ namespace Config {
                     .setOrbitAngularVelocity(90.f)
                     .setOrbitRadius(100.f)
                     .setMass(100.f)
-                    .setBehavior(KinematicsBehavior::Rotating | KinematicsBehavior::Pulsing |
-                                 KinematicsBehavior::Orbital | KinematicsBehavior::Attached)
+                    .setBehavior(KinematicsBehavior::Attached | KinematicsBehavior::FaceTarget)
                     .build())
-            .build();
-
-    const EntityConfig TOWER =
-        EntityConfigBuilder()
-            .setVisual(VisualDataBuilder()
-                           .setFilename("soldier.png")
-                           .setScale({2.f, 2.f})
-                           .setOrigin({50.f, 50.f})
-                           .build())
-            .setCollision(CollisionDataBuilder()
-                              .setBox({40.f, 40.f})
-                              .setScale({1.f, 1.f})
-                              .setOrigin({20.f, 25.f})
-                              .setDebugColor({0, 0, 255, 128})
-                              .build())
-            .setKinematics(KinematicsDataBuilder()
-                               .setVelocity({0.f, 0.f})
-                               .setAcceleration({0.f, 0.f})
-                               .setDrag(0.f)
-                               .setMass(1.f)
-                               .setDrag(2.f)
-                               .setBehavior(KinematicsBehavior::Accelerate)
-                               .build())
-            .addAnimation(EntityState::IDLE, AnimationInfoBuilder()
-                                                 .setFrameSize({100, 100})
-                                                 .setStartPos({0, 0})
-                                                 .setFrameCount(6)
-                                                 .setFrameDuration(sf::milliseconds(100))
-                                                 .setLoop(true)
-                                                 .build())
             .build();
 
     const EntityConfig VAMPIRE =
@@ -200,13 +170,39 @@ namespace Config {
                                .build())
             .build();
 
+    const EntityConfig BULLET =
+        EntityConfigBuilder()
+            .setVisual(VisualDataBuilder()
+                           .setFilename("vampire.png") // Using vampire sprite as a placeholder
+                           .setScale({1.f, 1.f})
+                           .setOrigin({8.f, 8.f})
+                           .build())
+            .setCollision(CollisionDataBuilder()
+                              .setCircle(10.f, 6)
+                              .setScale({1.f, 1.f})
+                              //   .setOrigin({5.f, 5.f})
+                              .setDebugColor({255, 255, 0, 200})
+                              .build())
+            .setKinematics(KinematicsDataBuilder()
+                               .setMass(5.f)
+                               .setRestition(0.5f)
+                               .setDrag(0.01f)
+                               .setGravity({0.f, 300.f})
+                               .setBehavior(KinematicsBehavior::Accelerate) // So gravity applies
+                               .build())
+            .setWeapon(WeaponDataBuilder()
+                           .setDamage(5.f)
+                           .setLifetime(3.f) // Bullet lasts 3 seconds
+                           .build())
+            .build();
+
     const std::unordered_map<EntityType, const EntityConfig &> ENTITY_CONFIGS = {
         {EntityType::PLAYER, PLAYER},
-        {EntityType::TOWER, TOWER},
         {EntityType::LASER_WEAPON, LASER_WEAPON},
         {EntityType::VAMPIRE, VAMPIRE},
         {EntityType::TEST_BOX, TEST_BOX},
         {EntityType::WALL_HORIZONTAL, WALL_HORIZONTAL},
-        {EntityType::WALL_VERTICAL, WALL_VERTICAL}}; // namespace Config
+        {EntityType::WALL_VERTICAL, WALL_VERTICAL},
+        {EntityType::BULLET, BULLET}}; // namespace Config
 
 } // namespace Config

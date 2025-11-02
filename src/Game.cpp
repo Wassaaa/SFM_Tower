@@ -7,6 +7,7 @@
 
 #include "ResourceManager.h"
 #include "Entity.h"
+#include "MathUtils.h"
 #include "Components/TransformComponent.h"
 #include "Components/CollisionComponent.h"
 #include "Components/KinematicsComponent.h"
@@ -56,6 +57,7 @@ bool Game::initialise()
     auto weapon =
         std::make_unique<Entity>(this, EntityType::LASER_WEAPON, m_pPlayerEntity->getPosition());
     weapon->addComponent<OwnerComponent>(m_pPlayerEntity);
+    m_pPlayerWeapon = weapon.get();
     m_entities.push_back(std::move(weapon));
 
     // Create boundary walls
@@ -66,37 +68,39 @@ bool Game::initialise()
 
 void Game::createBoundaryWalls()
 {
-    const float visibleThickness = 5.f;
+    const float topVisible = 5.f;
+    const float bottomVisible = 25.f;
+    const float leftVisible = 5.f;
+    const float rightVisible = 5.f;
 
     // Top wall
-    auto topWall = std::make_unique<Entity>(
-        this, EntityType::WALL_HORIZONTAL,
-        sf::Vector2f(Constants::SCREEN_WIDTH / 2.f,
-                     0.f - (Constants::WALL_THICKNESS / 2) + visibleThickness));
+    auto topWall =
+        std::make_unique<Entity>(this, EntityType::WALL_HORIZONTAL,
+                                 sf::Vector2f(Constants::SCREEN_WIDTH / 2.f,
+                                              0.f - (Constants::WALL_THICKNESS / 2) + topVisible));
     topWall->setStatic(true);
     m_entities.push_back(std::move(topWall));
 
     // Bottom wall
     auto bottomWall = std::make_unique<Entity>(
         this, EntityType::WALL_HORIZONTAL,
-        sf::Vector2f(Constants::SCREEN_WIDTH / 2.f, Constants::SCREEN_HEIGHT +
-                                                        (Constants::WALL_THICKNESS / 2) -
-                                                        visibleThickness));
+        sf::Vector2f(Constants::SCREEN_WIDTH / 2.f,
+                     Constants::SCREEN_HEIGHT + (Constants::WALL_THICKNESS / 2) - bottomVisible));
     bottomWall->setStatic(true);
     m_entities.push_back(std::move(bottomWall));
 
     // Left wall
-    auto leftWall = std::make_unique<Entity>(
-        this, EntityType::WALL_VERTICAL,
-        sf::Vector2f(0.f - (Constants::WALL_THICKNESS / 2) + visibleThickness,
-                     Constants::SCREEN_HEIGHT / 2.f));
+    auto leftWall =
+        std::make_unique<Entity>(this, EntityType::WALL_VERTICAL,
+                                 sf::Vector2f(0.f - (Constants::WALL_THICKNESS / 2) + leftVisible,
+                                              Constants::SCREEN_HEIGHT / 2.f));
     leftWall->setStatic(true);
     m_entities.push_back(std::move(leftWall));
 
     // right wall
     auto rightWall = std::make_unique<Entity>(
         this, EntityType::WALL_VERTICAL,
-        sf::Vector2f(Constants::SCREEN_WIDTH + (Constants::WALL_THICKNESS / 2) - visibleThickness,
+        sf::Vector2f(Constants::SCREEN_WIDTH + (Constants::WALL_THICKNESS / 2) - rightVisible,
                      Constants::SCREEN_HEIGHT / 2.f));
     rightWall->setStatic(true);
     m_entities.push_back(std::move(rightWall));
@@ -115,16 +119,28 @@ void Game::update(float deltaTime, sf::RenderWindow &window)
             spawnBox();
             input.spawnBox = false;
         }
-        // if (input.action1) {
-        //     auto weapon = std::make_unique<Entity>(this, EntityType::LASER_WEAPON,
-        //                                            m_pPlayerEntity->getPosition());
+        if (input.action1) {
+            sf::Vector2f playerPos = m_pPlayerEntity->getPosition();
+            sf::Vector2f mousePos = input.mouseWorldPosition;
 
-        //     // Add owner
-        //     weapon->addComponent<OwnerComponent>(m_pPlayerEntity);
+            // Calculate direction vector
+            sf::Vector2f dir = mousePos - playerPos;
+            dir = VecNormalized(dir);
 
-        //     m_entities.push_back(std::move(weapon));
-        //     input.action1 = false; // Consume the input
-        // }
+            const float bulletSpeed = 3000.f;
+
+            // Create a bullet entity
+            auto bullet = std::make_unique<Entity>(this, EntityType::BULLET, playerPos);
+            if (auto *kin = bullet->getComponent<KinematicsComponent>()) {
+                kin->velocity = dir * bulletSpeed;
+                if (auto *playerKin = m_pPlayerEntity->getComponent<KinematicsComponent>()) {
+                    kin->velocity += playerKin->velocity;
+                }
+            }
+            bullet->addComponent<OwnerComponent>(m_pPlayerEntity);
+            m_entities.push_back(std::move(bullet));
+            input.action1 = false;
+        }
 
         sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
         sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
@@ -132,15 +148,23 @@ void Game::update(float deltaTime, sf::RenderWindow &window)
 
         if (m_pPlayerEntity) {
             m_pPlayerEntity->handleInput(deltaTime, input);
-            if (auto *kin = m_pPlayerEntity->getComponent<KinematicsComponent>()) {
-                kin->targetPoint = &input.mouseWorldPosition;
+        }
+        if (m_pPlayerWeapon) {
+            if (auto *kin = m_pPlayerWeapon->getComponent<KinematicsComponent>()) {
+                kin->aimPoint = &input.mouseWorldPosition;
+            }
+        }
+
+        for (const auto &entity : m_entities) {
+            if (auto *kin = entity->getComponent<KinematicsComponent>()) {
+                kin->isGrounded = false;
             }
         }
 
         // Run logic systems
         m_targetingSystem->update(m_entities);
-        m_kinematicsSystem->update(deltaTime, m_entities);
         m_collisionSystem->update(deltaTime, m_entities);
+        m_kinematicsSystem->update(deltaTime, m_entities);
         m_animationSystem->update(deltaTime, m_entities);
     } break;
 
@@ -187,7 +211,7 @@ void Game::spawnBox(const sf::Vector2f *position)
 
     auto box = std::make_unique<Entity>(this, EntityType::TEST_BOX, spawnPos);
     if (auto *kin = box->getComponent<KinematicsComponent>()) {
-        // kin->mass = std::numeric_limits<float>::infinity();
+        kin->mass = 5.f;
         kin->velocity = rnd;
     }
     box->addComponent<HealthComponent>(10.f);

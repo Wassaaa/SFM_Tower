@@ -160,6 +160,7 @@ sf::Vector2f Entity::getVelocity() const
     if (auto *kinematics = getComponent<KinematicsComponent>()) {
         return kinematics->velocity;
     }
+    return sf::Vector2f({0, 0});
 }
 
 void Entity::resolveCollision(const sf::Vector2f &pushVector)

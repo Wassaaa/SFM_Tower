@@ -28,4 +28,5 @@ enum class EntityType
     TEST_BOX,
     WALL_HORIZONTAL,
     WALL_VERTICAL,
+    BULLET
 };

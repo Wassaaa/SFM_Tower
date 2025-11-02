@@ -18,6 +18,7 @@ struct InputState
 
     // Mouse
     sf::Vector2f mouseWorldPosition{0.f, 0.f};
+    bool shoot = false;
 
     bool hasMovementInput() const { return moveUp || moveDown || moveLeft || moveRight; }
 };
