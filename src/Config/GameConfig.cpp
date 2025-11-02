@@ -15,7 +15,7 @@ namespace Config {
             .setKinematics(KinematicsDataBuilder()
                                .setVelocity({0.f, 0.f})
                                .setAcceleration({0.f, 0.f})
-                               //    .setDrag(2.f)
+                               .setDrag(2.f)
                                .setMass(62.f)
                                .setBehavior(KinematicsBehavior::Accelerate)
                                .build())
@@ -90,6 +90,7 @@ namespace Config {
                     .setAngularVelocity(720.f)
                     .setOrbitAngularVelocity(90.f)
                     .setOrbitRadius(100.f)
+                    .setMass(100.f)
                     .setBehavior(KinematicsBehavior::Rotating | KinematicsBehavior::Pulsing |
                                  KinematicsBehavior::Orbital | KinematicsBehavior::Attached)
                     .build())
@@ -161,7 +162,7 @@ namespace Config {
                                .setAcceleration({0.f, 0.f})
                                .setGravity({0.f, 0.f})
                                .setDrag(0.f)
-                               .setMass(100000.f)
+                               .setMass(100.f)
                                .setBehavior(KinematicsBehavior::Accelerate)
                                .build())
             .build();
