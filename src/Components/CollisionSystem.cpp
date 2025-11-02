@@ -237,19 +237,28 @@ void CollisionSystem::handleCollision(Entity *entityA, Entity *entityB, const sf
         return;
 
     // Calculate inverse masses
+    if (kinA->isStatic && kinB->isStatic) {
+        return;
+    }
+
     float invMassA = 0.f;
     float invMassB = 0.f;
-    if (kinA->mass != 0.f && !std::isinf(kinA->mass) && !kinA->isStatic) {
+    if (kinA->mass != 0.f && !std::isinf(kinA->mass)) {
         invMassA = 1.f / kinA->mass;
     }
-    if (kinB->mass != 0.f && !std::isinf(kinB->mass) && !kinB->isStatic) {
+    if (kinB->mass != 0.f && !std::isinf(kinB->mass)) {
         invMassB = 1.f / kinB->mass;
     }
     float totalInvMass = invMassA + invMassB;
 
-    // both infinite mass, cant move
     if (totalInvMass < EPSILON) {
-        return;
+        // if total mass is near 0, its probably 2 infinite objects, that can bounce
+        // but still make sure that we are not going to move a static entity
+        // 1.f if not static, 0.f if static
+        invMassA = !kinA->isStatic;
+        invMassB = !kinB->isStatic;
+
+        totalInvMass = invMassA + invMassB;
     }
 
     // calc impulse
@@ -283,9 +292,6 @@ void CollisionSystem::handleCollision(Entity *entityA, Entity *entityB, const sf
 
     sf::Vector2f correction = std::max(depth - Constants::SLOP, 0.f) / totalInvMass *
                               Constants::CORRECTION_PER_FRAME * normal;
-
-    sf::Vector2f pushA = -correction * invMassA;
-    sf::Vector2f pushB = correction * invMassB;
 
     entityA->resolveCollision(-correction * invMassA);
     entityB->resolveCollision(correction * invMassB);
