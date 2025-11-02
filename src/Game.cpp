@@ -115,16 +115,16 @@ void Game::update(float deltaTime, sf::RenderWindow &window)
             spawnBox();
             input.spawnBox = false;
         }
-        if (input.action1) {
-            auto weapon = std::make_unique<Entity>(this, EntityType::LASER_WEAPON,
-                                                   m_pPlayerEntity->getPosition());
+        // if (input.action1) {
+        //     auto weapon = std::make_unique<Entity>(this, EntityType::LASER_WEAPON,
+        //                                            m_pPlayerEntity->getPosition());
 
-            // Add owner
-            weapon->addComponent<OwnerComponent>(m_pPlayerEntity);
+        //     // Add owner
+        //     weapon->addComponent<OwnerComponent>(m_pPlayerEntity);
 
-            m_entities.push_back(std::move(weapon));
-            input.action1 = false; // Consume the input
-        }
+        //     m_entities.push_back(std::move(weapon));
+        //     input.action1 = false; // Consume the input
+        // }
 
         sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
         sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);

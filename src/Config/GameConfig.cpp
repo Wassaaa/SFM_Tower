@@ -159,8 +159,9 @@ namespace Config {
             .setKinematics(KinematicsDataBuilder()
                                .setVelocity({0.f, 0.f})
                                .setAcceleration({0.f, 0.f})
+                               .setGravity({0.f, 0.f})
                                .setDrag(0.f)
-                               .setMass(1.f)
+                               .setMass(100000.f)
                                .setBehavior(KinematicsBehavior::Accelerate)
                                .build())
             .build();
@@ -174,9 +175,8 @@ namespace Config {
                     .setDebugColor({128, 128, 128, 200})
                     .build())
             .setKinematics(KinematicsDataBuilder()
-                               .setMass(100000000.f)
                                .setRestition(0.1f)
-                               //    .setMass(std::numeric_limits<float>::infinity())
+                               .setMass(std::numeric_limits<float>::infinity())
                                .setStatic(true)
                                .build())
             .build();
@@ -190,9 +190,8 @@ namespace Config {
                     .setDebugColor({128, 128, 128, 200})
                     .build())
             .setKinematics(KinematicsDataBuilder()
-                               .setMass(100000000.f)
                                .setRestition(0.1f)
-                               //    .setMass(std::numeric_limits<float>::infinity())
+                               .setMass(std::numeric_limits<float>::infinity())
                                .setStatic(true)
                                .build())
             .build();

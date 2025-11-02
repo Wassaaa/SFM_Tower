@@ -84,14 +84,16 @@ void Entity::handleInput(float deltaTime, const InputState &input)
         sf::Vector2f acceleration(0.f, 0.f);
         const float accelerationForce = 1500.f; // Acceleration force
 
-        if (input.moveUp)
-            acceleration.y -= accelerationForce;
-        if (input.moveDown)
-            acceleration.y += accelerationForce;
+        // if (input.moveUp)
+        //     acceleration.y -= accelerationForce;
+        // if (input.moveDown)
+        //     acceleration.y += accelerationForce;
         if (input.moveLeft)
             acceleration.x -= accelerationForce;
         if (input.moveRight)
             acceleration.x += accelerationForce;
+        if (input.action1)
+            kinematics->velocity.y = -1000.f;
 
         // Normalize
         float length = std::sqrt(acceleration.x * acceleration.x + acceleration.y * acceleration.y);

@@ -250,7 +250,7 @@ public:
         m_restitution = restitution;
         return *this;
     }
-    KinematicsDataBuilder &setGravity(float gravity)
+    KinematicsDataBuilder &setGravity(sf::Vector2f gravity)
     {
         m_gravity = gravity;
         return *this;
@@ -292,7 +292,7 @@ private:
     float m_pulseAmplitude{0.2f};
     float m_drag{0.f};
     float m_mass{1.f};
-    float m_gravity{9.8f};
+    sf::Vector2f m_gravity{0.f, 2000.f};
     float m_restitution{.5f};
     bool m_isStatic{false};
 };

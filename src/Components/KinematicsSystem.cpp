@@ -41,6 +41,11 @@ void KinematicsSystem::update(float dt, std::vector<std::unique_ptr<Entity>> &en
 
 void KinematicsSystem::handleVelocity(float dt, KinematicsComponent *kinematics)
 {
+    // Gravity
+    if (kinematics->mass != 0.f && !std::isinf(kinematics->mass)) {
+        kinematics->acceleration += kinematics->gravity;
+    }
+
     // Accelerate
     if (hasFlag(kinematics->behavior, KinematicsBehavior::Accelerate)) {
         kinematics->velocity += kinematics->acceleration * dt;
@@ -49,7 +54,8 @@ void KinematicsSystem::handleVelocity(float dt, KinematicsComponent *kinematics)
     // Drag
     if (kinematics->drag > 0.f) {
         float dampingFactor = 1.f / (1.f + kinematics->drag * dt);
-        kinematics->velocity *= dampingFactor;
+        // only apply drag horizontally
+        kinematics->velocity.x *= dampingFactor;
         if (VecLengthSquared(kinematics->velocity) < 1.f) {
             kinematics->velocity = {0.f, 0.f};
         }

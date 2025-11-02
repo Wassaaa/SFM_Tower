@@ -18,7 +18,7 @@ public:
     float pulseAmplitude;
     float drag;
     float mass;
-    float gravity;
+    sf::Vector2f gravity;
     float restitution;
     bool isStatic;
 
