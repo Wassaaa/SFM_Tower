@@ -94,7 +94,7 @@ void Entity::handleInput(float deltaTime, const InputState &input)
             acceleration.x += accelerationForce;
         if (input.action1)
             if (kinematics->isGrounded) {
-                kinematics->velocity.y = -1000.f;
+                kinematics->velocity.y = -2000.f;
             }
 
         // Normalize
@@ -153,6 +153,13 @@ sf::Vector2f Entity::getCenter() const
         return transform->position;
     }
     return m_initialPosition;
+}
+
+sf::Vector2f Entity::getVelocity() const
+{
+    if (auto *kinematics = getComponent<KinematicsComponent>()) {
+        return kinematics->velocity;
+    }
 }
 
 void Entity::resolveCollision(const sf::Vector2f &pushVector)

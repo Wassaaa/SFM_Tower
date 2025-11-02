@@ -273,19 +273,19 @@ void CollisionSystem::handleCollision(Entity *entityA, Entity *entityB, const sf
         entityB->applyCollisionImpulse(impulse * invMassB);
     }
 
+    // if correction pushes entity up, we know its grounded
+    if (normal.y > 0.f) {
+        kinA->isGrounded = true;
+    }
+    if (normal.y < 0.f) {
+        kinB->isGrounded = true;
+    }
+
     sf::Vector2f correction = std::max(depth - Constants::SLOP, 0.f) / totalInvMass *
                               Constants::CORRECTION_PER_FRAME * normal;
 
     sf::Vector2f pushA = -correction * invMassA;
     sf::Vector2f pushB = correction * invMassB;
-
-    // if correction pushes entity up, we know its grounded
-    if (pushA.y < 0.f) {
-        kinA->isGrounded = true;
-    }
-    if (pushB.y < 0.f) {
-        kinB->isGrounded = true;
-    }
 
     entityA->resolveCollision(-correction * invMassA);
     entityB->resolveCollision(correction * invMassB);

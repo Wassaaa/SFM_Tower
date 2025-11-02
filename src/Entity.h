@@ -21,6 +21,8 @@ public:
 
     sf::Vector2f getCenter() const;
 
+    sf::Vector2f getVelocity() const;
+
     EntityType getType() const { return m_type; }
     void setColliding(bool colliding);
     virtual void enableCollision(bool state);
