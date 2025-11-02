@@ -30,17 +30,6 @@ void RenderSystem::draw(sf::RenderTarget &target, sf::RenderStates states,
 void RenderSystem::prepareEntity(VisualComponent *visual, CollisionComponent *collision,
                                  DirectionComponent *dir) const
 {
-    // Sprite Flipping
-    // if (visual && dir && visual->isEnabled()) {
-    //     sf::Vector2f scale = visual->getScale();
-    //     float absScaleX = std::abs(scale.x);
-
-    //     if (dir->isFacingLeft() && scale.x > 0)
-    //         visual->setScale({-absScaleX, scale.y});
-    //     else if (dir->isFacingRight() && scale.x < 0)
-    //         visual->setScale({absScaleX, scale.y});
-    // }
-
     // collision outline
     if (Constants::DEBUG_DRAW && collision && collision->isEnabled()) {
         sf::Shape *debugShape = collision->getDebugShape();
