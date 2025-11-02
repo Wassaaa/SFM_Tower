@@ -93,7 +93,9 @@ void Entity::handleInput(float deltaTime, const InputState &input)
         if (input.moveRight)
             acceleration.x += accelerationForce;
         if (input.action1)
-            kinematics->velocity.y = -1000.f;
+            if (kinematics->isGrounded) {
+                kinematics->velocity.y = -1000.f;
+            }
 
         // Normalize
         float length = std::sqrt(acceleration.x * acceleration.x + acceleration.y * acceleration.y);

@@ -21,6 +21,7 @@ void KinematicsSystem::update(float dt, std::vector<std::unique_ptr<Entity>> &en
 
         kinematics->lastPosition = transform->position;
         kinematics->teleported = false;
+        kinematics->isGrounded = false;
 
         // Accelerate, Drag, Homing
         handleVelocity(dt, kinematics);

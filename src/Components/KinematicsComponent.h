@@ -31,6 +31,7 @@ public:
 
     sf::Vector2f lastPosition{0.f, 0.f};
     bool teleported{false};
+    bool isGrounded{false};
 
     KinematicsComponent(const KinematicsComponentData &data)
         : velocity(data.velocity)

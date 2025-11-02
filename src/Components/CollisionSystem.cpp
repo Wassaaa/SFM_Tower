@@ -239,10 +239,10 @@ void CollisionSystem::handleCollision(Entity *entityA, Entity *entityB, const sf
     // Calculate inverse masses
     float invMassA = 0.f;
     float invMassB = 0.f;
-    if ((kinA->mass != 0.f && !std::isinf(kinA->mass))) {
+    if (kinA->mass != 0.f && !std::isinf(kinA->mass) && !kinA->isStatic) {
         invMassA = 1.f / kinA->mass;
     }
-    if ((kinB->mass != 0.f && !std::isinf(kinB->mass))) {
+    if (kinB->mass != 0.f && !std::isinf(kinB->mass) && !kinB->isStatic) {
         invMassB = 1.f / kinB->mass;
     }
     float totalInvMass = invMassA + invMassB;
@@ -275,6 +275,17 @@ void CollisionSystem::handleCollision(Entity *entityA, Entity *entityB, const sf
 
     sf::Vector2f correction = std::max(depth - Constants::SLOP, 0.f) / totalInvMass *
                               Constants::CORRECTION_PER_FRAME * normal;
+
+    sf::Vector2f pushA = -correction * invMassA;
+    sf::Vector2f pushB = correction * invMassB;
+
+    // if correction pushes entity up, we know its grounded
+    if (pushA.y < 0.f) {
+        kinA->isGrounded = true;
+    }
+    if (pushB.y < 0.f) {
+        kinB->isGrounded = true;
+    }
 
     entityA->resolveCollision(-correction * invMassA);
     entityB->resolveCollision(correction * invMassB);
