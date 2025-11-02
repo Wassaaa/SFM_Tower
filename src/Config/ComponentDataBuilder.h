@@ -245,6 +245,16 @@ public:
         m_mass = mass;
         return *this;
     }
+    KinematicsDataBuilder &setRestition(float restitution)
+    {
+        m_restitution = restitution;
+        return *this;
+    }
+    KinematicsDataBuilder &setGravity(float gravity)
+    {
+        m_gravity = gravity;
+        return *this;
+    }
     KinematicsDataBuilder &setStatic(bool isStatic)
     {
         m_isStatic = isStatic;
@@ -264,6 +274,8 @@ public:
                 m_pulseAmplitude,
                 m_drag,
                 m_mass,
+                m_gravity,
+                m_restitution,
                 m_isStatic};
     }
 
@@ -280,5 +292,7 @@ private:
     float m_pulseAmplitude{0.2f};
     float m_drag{0.f};
     float m_mass{1.f};
+    float m_gravity{9.8f};
+    float m_restitution{.5f};
     bool m_isStatic{false};
 };

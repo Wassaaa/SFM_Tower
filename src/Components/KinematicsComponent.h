@@ -18,6 +18,8 @@ public:
     float pulseAmplitude;
     float drag;
     float mass;
+    float gravity;
+    float restitution;
     bool isStatic;
 
     // calculated runtime state
@@ -42,6 +44,8 @@ public:
         , pulseAmplitude(data.pulseAmplitude)
         , drag(data.drag)
         , mass(data.mass)
+        , gravity(data.gravity)
+        , restitution(data.restitution)
         , isStatic(data.isStatic)
     {}
 

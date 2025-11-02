@@ -279,8 +279,7 @@ void CollisionSystem::handleStaticDynamicCollision(Entity *staticEntity, Entity 
 
     // Apply impulse if approaching
     if (velAlongNormal < EPSILON) {
-        const float restitution = 1.0f;
-        float impulseMagnitude = -(1.f + restitution) * velAlongNormal;
+        float impulseMagnitude = -(1.f + kin->restitution) * velAlongNormal;
         sf::Vector2f impulse = normal * impulseMagnitude;
         dynamicEntity->applyCollisionImpulse(impulse);
     }
