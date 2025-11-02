@@ -11,8 +11,6 @@ class CollisionComponent : public Component, public sf::Drawable
 {
 public:
     // config based runtime state
-    CollisionShape type;
-    float radius;
     std::vector<sf::Vector2f> localPoints;
 
     // Local transform properties
@@ -32,9 +30,7 @@ public:
     }
 
     CollisionComponent(const CollisionComponentData &data)
-        : type(data.type)
-        , radius(data.radius)
-        , localPoints(data.points)
+        : localPoints(data.points)
         , scale(data.scale)
         , origin(data.origin)
         , offset(data.offset)
@@ -55,23 +51,12 @@ private:
 
     void initDebug()
     {
-        switch (type) {
-        case CollisionShape::Circle: {
-            auto circle = std::make_shared<sf::CircleShape>(radius);
-            m_debugShape = std::move(circle);
-            break;
+        auto polygon = std::make_shared<sf::ConvexShape>(localPoints.size());
+        for (size_t i = 0; i < localPoints.size(); i++) {
+            polygon->setPoint(i, localPoints[i]);
         }
-        case CollisionShape::Polygon: {
-            auto polygon = std::make_shared<sf::ConvexShape>(localPoints.size());
-            for (size_t i = 0; i < localPoints.size(); i++) {
-                polygon->setPoint(i, localPoints[i]);
-            }
-            m_debugShape = std::move(polygon);
-            break;
-        }
-        default:
-            break;
-        }
+        m_debugShape = std::move(polygon);
+
         m_debugShape->setOrigin(origin);
         m_debugShape->setScale(scale);
         m_debugShape->setRotation(rotation);

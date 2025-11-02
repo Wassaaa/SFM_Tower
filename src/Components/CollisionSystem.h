@@ -30,15 +30,6 @@ private:
                                    const CollisionComponent &colB,
                                    const TransformComponent &transB) const;
 
-    // Specific shape-vs-shape checks
-    CollisionResult circleCircleCollision(const CollisionComponent &colA,
-                                          const TransformComponent &transA,
-                                          const CollisionComponent &colB,
-                                          const TransformComponent &transB) const;
-    CollisionResult circlePolygonCollision(const CollisionComponent &circleCol,
-                                           const TransformComponent &circleTrans,
-                                           const CollisionComponent &polyCol,
-                                           const TransformComponent &polyTrans) const;
     CollisionResult polygonPolygonCollision(const CollisionComponent &colA,
                                             const TransformComponent &transA,
                                             const CollisionComponent &colB,
@@ -47,7 +38,6 @@ private:
     // Helper functions
     std::vector<sf::Vector2f> getWorldPoints(const CollisionComponent &col,
                                              const TransformComponent &trans) const;
-    float getWorldRadius(const CollisionComponent &col, const TransformComponent &trans) const;
     sf::Vector2f getCenter(const CollisionComponent &col, const TransformComponent &trans) const;
     sf::FloatRect getBounds(const CollisionComponent &col, const TransformComponent &trans) const;
     sf::Transform getComponentTransform(const CollisionComponent &col,

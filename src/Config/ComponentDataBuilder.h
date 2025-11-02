@@ -46,22 +46,23 @@ private:
 class CollisionDataBuilder
 {
 public:
-    CollisionDataBuilder &setCircle(float radius)
+    CollisionDataBuilder &setCircle(float radius, size_t pointCount = 15)
     {
-        m_type = CollisionShape::Circle;
-        m_radius = radius;
+        sf::CircleShape circle(radius, pointCount);
+        m_points.reserve(pointCount);
+        for (int i = 0; i < circle.getPointCount(); i++) {
+            m_points.push_back(circle.getPoint(i));
+        }
         m_origin = {radius, radius};
         return *this;
     }
     CollisionDataBuilder &setPolygon(const std::vector<sf::Vector2f> &points)
     {
-        m_type = CollisionShape::Polygon;
         m_points = points;
         return *this;
     }
     CollisionDataBuilder &setBox(const sf::Vector2f &size)
     {
-        m_type = CollisionShape::Polygon;
         m_points = {{0, 0}, {size.x, 0}, {size.x, size.y}, {0, size.y}};
         return *this;
     }
@@ -73,9 +74,6 @@ public:
     CollisionDataBuilder &setOrigin(const sf::Vector2f &origin)
     {
         m_origin = origin;
-        if (m_type == CollisionShape::Circle) {
-            m_origin = {m_radius, m_radius};
-        }
         return *this;
     }
     CollisionDataBuilder &setOffset(const sf::Vector2f &offset)
@@ -95,12 +93,10 @@ public:
     }
     CollisionComponentData build() const
     {
-        return {m_type, m_radius, m_points, m_scale, m_origin, m_offset, m_rotation, m_debugColor};
+        return {m_points, m_scale, m_origin, m_offset, m_rotation, m_debugColor};
     }
 
 private:
-    CollisionShape m_type{CollisionShape::Polygon};
-    float m_radius{0.f};
     std::vector<sf::Vector2f> m_points;
     sf::Vector2f m_scale{1.f, 1.f};
     sf::Vector2f m_origin{0.f, 0.f};

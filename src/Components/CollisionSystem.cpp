@@ -143,24 +143,10 @@ std::vector<sf::Vector2f> CollisionSystem::getWorldPoints(const CollisionCompone
     return worldPoints;
 }
 
-float CollisionSystem::getWorldRadius(const CollisionComponent &col,
-                                      const TransformComponent &trans) const
-{
-    // Averaging entity scale
-    sf::Vector2f finalScale =
-        sf::Vector2f(trans.scale.x * col.scale.x, trans.scale.y * col.scale.y);
-    return col.radius * (finalScale.x + finalScale.y) * 0.5f;
-}
-
 sf::Vector2f CollisionSystem::getCenter(const CollisionComponent &col,
                                         const TransformComponent &trans) const
 {
-    if (col.type == CollisionShape::Circle) {
-        // Center of a circle is its origin point, transformed
-        return getComponentTransform(col, trans).transformPoint(col.origin);
-    }
-
-    // For polygons, calculate centroid
+    // Calculate centroid
     const std::vector<sf::Vector2f> worldPoints = getWorldPoints(col, trans);
     if (worldPoints.empty()) {
         return trans.position;
@@ -175,26 +161,19 @@ sf::Vector2f CollisionSystem::getCenter(const CollisionComponent &col,
 sf::FloatRect CollisionSystem::getBounds(const CollisionComponent &col,
                                          const TransformComponent &trans) const
 {
-    if (col.type == CollisionShape::Circle) {
-        sf::Vector2f center = getCenter(col, trans);
-        float radius = getWorldRadius(col, trans);
-        return sf::FloatRect(center.x - radius, center.y - radius, radius * 2, radius * 2);
+    std::vector<sf::Vector2f> worldPoints = getWorldPoints(col, trans);
+    if (worldPoints.empty()) {
+        return sf::FloatRect();
     }
-    else {
-        std::vector<sf::Vector2f> worldPoints = getWorldPoints(col, trans);
-        if (worldPoints.empty()) {
-            return sf::FloatRect();
-        }
-        float minX = worldPoints[0].x, maxX = worldPoints[0].x;
-        float minY = worldPoints[0].y, maxY = worldPoints[0].y;
-        for (const auto &point : worldPoints) {
-            minX = std::min(minX, point.x);
-            maxX = std::max(maxX, point.x);
-            minY = std::min(minY, point.y);
-            maxY = std::max(maxY, point.y);
-        }
-        return sf::FloatRect(minX, minY, maxX - minX, maxY - minY);
+    float minX = worldPoints[0].x, maxX = worldPoints[0].x;
+    float minY = worldPoints[0].y, maxY = worldPoints[0].y;
+    for (const auto &point : worldPoints) {
+        minX = std::min(minX, point.x);
+        maxX = std::max(maxX, point.x);
+        minY = std::min(minY, point.y);
+        maxY = std::max(maxY, point.y);
     }
+    return sf::FloatRect(minX, minY, maxX - minX, maxY - minY);
 }
 
 void CollisionSystem::processCombat(Entity *entityA, Entity *entityB)
@@ -294,8 +273,8 @@ void CollisionSystem::handleCollision(Entity *entityA, Entity *entityB, const sf
         entityB->applyCollisionImpulse(impulse * invMassB);
     }
 
-    sf::Vector2f correction =
-        std::max(depth - Constants::SLOP, 0.f) / totalInvMass * Constants::CORRECTION_PER_FRAME * normal;
+    sf::Vector2f correction = std::max(depth - Constants::SLOP, 0.f) / totalInvMass *
+                              Constants::CORRECTION_PER_FRAME * normal;
 
     entityA->resolveCollision(-correction * invMassA);
     entityB->resolveCollision(correction * invMassB);
@@ -309,167 +288,7 @@ CollisionResult CollisionSystem::checkCollision(const CollisionComponent &colA,
     if (!getBounds(colA, transA).intersects(getBounds(colB, transB))) {
         return {false, {0.f, 0.f}, 0.f};
     }
-
-    if (colA.type == CollisionShape::Circle && colB.type == CollisionShape::Circle) {
-        return circleCircleCollision(colA, transA, colB, transB);
-    }
-    else if (colA.type == CollisionShape::Circle) {
-        auto result = circlePolygonCollision(colA, transA, colB, transB);
-        result.normal = -result.normal; // Flip normal
-        return result;
-    }
-    else if (colB.type == CollisionShape::Circle) {
-        return circlePolygonCollision(colB, transB, colA, transA);
-    }
-    else {
-        return polygonPolygonCollision(colA, transA, colB, transB);
-    }
-}
-
-CollisionResult CollisionSystem::circleCircleCollision(const CollisionComponent &colA,
-                                                       const TransformComponent &transA,
-                                                       const CollisionComponent &colB,
-                                                       const TransformComponent &transB) const
-{
-    CollisionResult result = {false, {0.f, 0.f}, 0.f};
-    sf::Vector2f centerA = getCenter(colA, transA);
-    sf::Vector2f centerB = getCenter(colB, transB);
-    float radiusA = getWorldRadius(colA, transA);
-    float radiusB = getWorldRadius(colB, transB);
-
-    sf::Vector2f diff = centerB - centerA;
-    float distSq = VecLengthSquared(diff);
-    float radiusSum = radiusA + radiusB;
-
-    if (distSq >= radiusSum * radiusSum) {
-        return result;
-    }
-
-    result.intersects = true;
-    float dist = std::sqrt(distSq);
-    result.depth = radiusSum - dist;
-
-    if (dist > EPSILON)
-        result.normal = diff / dist;
-    else
-        result.normal = sf::Vector2f(1.f, 0.f);
-
-    return result;
-}
-
-CollisionResult CollisionSystem::circlePolygonCollision(const CollisionComponent &circleCol,
-                                                        const TransformComponent &circleTrans,
-                                                        const CollisionComponent &polyCol,
-                                                        const TransformComponent &polyTrans) const
-{
-    CollisionResult result = {false, {0.f, 0.f}, 0.f};
-
-    // Circle is 'this', polygon is 'other'
-    sf::Vector2f circleCenter = getCenter(circleCol, circleTrans);
-    float radius = getWorldRadius(circleCol, circleTrans);
-    std::vector<sf::Vector2f> polyPoints = getWorldPoints(polyCol, polyTrans);
-
-    if (polyPoints.empty()) {
-        return result;
-    }
-
-    float minOverlap = std::numeric_limits<float>::max();
-    sf::Vector2f minAxis;
-    sf::Vector2f polyCenter = getCenter(polyCol, polyTrans);
-
-    for (size_t i = 0; i < polyPoints.size(); i++) {
-        sf::Vector2f p1 = polyPoints[i];
-        sf::Vector2f p2 = polyPoints[(i + 1) % polyPoints.size()];
-        sf::Vector2f edge = p2 - p1;
-        sf::Vector2f axis = Perpendicular(edge);
-
-        // Normalize the axis to correctly project the circle's radius
-        axis = VecNormalized(axis);
-        if (VecLengthSquared(axis) < EPSILON * EPSILON) {
-            continue;
-        }
-
-        // Project the polygon
-        float minPoly, maxPoly;
-        projectOntoAxis(polyPoints, axis, minPoly, maxPoly);
-
-        // Project the circle
-        float circleProj = DotProduct(circleCenter, axis);
-        float minCircle = circleProj - radius;
-        float maxCircle = circleProj + radius;
-
-        // Check for a separating axis
-        if (maxCircle < minPoly || maxPoly < minCircle) {
-            return result;
-        }
-
-        // No gap, calculate the overlap
-        float overlap = std::min(maxCircle - minPoly, maxPoly - minCircle);
-
-        // Track the minimum overlap
-        if (overlap < minOverlap) {
-            minOverlap = overlap;
-            minAxis = axis;
-        }
-    }
-
-    sf::Vector2f closestVertex;
-    float minVertexDistSq = std::numeric_limits<float>::max();
-
-    // Find the polygon vertex closest to the circle's center
-    for (const auto &vertex : polyPoints) {
-        float distSq = DistanceSquared(circleCenter, vertex);
-        if (distSq < minVertexDistSq) {
-            minVertexDistSq = distSq;
-            closestVertex = vertex;
-        }
-    }
-
-    // Create the axis from the center to the closest vertex
-    sf::Vector2f axis = closestVertex - circleCenter;
-
-    // Check if circle center is on a vertex
-    if (VecLengthSquared(axis) < EPSILON * EPSILON) {
-        // This is a rare case, but it's a definite collision.
-    }
-    else {
-        axis = VecNormalized(axis);
-
-        // Project the polygon
-        float minPoly, maxPoly;
-        projectOntoAxis(polyPoints, axis, minPoly, maxPoly);
-
-        // Project the circle
-        float circleProj = DotProduct(circleCenter, axis);
-        float minCircle = circleProj - radius;
-        float maxCircle = circleProj + radius;
-
-        // Check for a separating axis
-        if (maxCircle < minPoly || maxPoly < minCircle) {
-            return result; // Found a gap, no collision
-        }
-
-        // Calculate overlap
-        float overlap = std::min(maxCircle - minPoly, maxPoly - minCircle);
-
-        // Track the minimum overlap
-        if (overlap < minOverlap) {
-            minOverlap = overlap;
-            minAxis = axis;
-        }
-    }
-
-    result.intersects = true;
-    result.depth = minOverlap;
-
-    sf::Vector2f toCircle = circleCenter - polyCenter;
-    if (DotProduct(minAxis, toCircle) < 0.f) {
-        minAxis = -minAxis;
-    }
-
-    result.normal = minAxis;
-
-    return result;
+    return polygonPolygonCollision(colA, transA, colB, transB);
 }
 
 CollisionResult CollisionSystem::polygonPolygonCollision(const CollisionComponent &colA,
