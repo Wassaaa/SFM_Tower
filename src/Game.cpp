@@ -10,6 +10,9 @@
 #include "Components/TransformComponent.h"
 #include "Components/CollisionComponent.h"
 #include "Components/KinematicsComponent.h"
+#include "Components/HealthComponent.h"
+#include "Components/WeaponComponent.h"
+#include "Components/OwnerComponent.h"
 #include "Constants.h"
 
 Game::Game()
@@ -32,6 +35,7 @@ bool Game::initialise()
     m_kinematicsSystem = std::make_unique<KinematicsSystem>();
     m_renderSystem = std::make_unique<RenderSystem>();
     m_animationSystem = std::make_unique<AnimationSystem>();
+    m_targetingSystem = std::make_unique<TargetingSystem>();
 
     // Create a player controlled box
     auto playerEntity =
@@ -44,11 +48,15 @@ bool Game::initialise()
     m_pPlayerEntity = playerEntity.get();
 
     if (auto *kin = m_pPlayerEntity->getComponent<KinematicsComponent>()) {
-        kin->behavior = kin->behavior | KinematicsBehavior::FaceTarget;
-        kin->angularVelocity = 720.f;
+        // add testing kin effects
     }
-
     m_entities.push_back(std::move(playerEntity));
+
+    // Create a weapon entity owned by the player
+    auto weapon =
+        std::make_unique<Entity>(this, EntityType::LASER_WEAPON, m_pPlayerEntity->getPosition());
+    weapon->addComponent<OwnerComponent>(m_pPlayerEntity);
+    m_entities.push_back(std::move(weapon));
 
     // Create boundary walls
     createBoundaryWalls();
@@ -107,6 +115,16 @@ void Game::update(float deltaTime, sf::RenderWindow &window)
             spawnBox();
             input.spawnBox = false;
         }
+        if (input.action1) {
+            auto weapon = std::make_unique<Entity>(this, EntityType::LASER_WEAPON,
+                                                   m_pPlayerEntity->getPosition());
+
+            // Add owner
+            weapon->addComponent<OwnerComponent>(m_pPlayerEntity);
+
+            m_entities.push_back(std::move(weapon));
+            input.action1 = false; // Consume the input
+        }
 
         sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
         sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
@@ -120,6 +138,7 @@ void Game::update(float deltaTime, sf::RenderWindow &window)
         }
 
         // Run logic systems
+        m_targetingSystem->update(m_entities);
         m_kinematicsSystem->update(deltaTime, m_entities);
         m_collisionSystem->update(deltaTime, m_entities);
         m_animationSystem->update(deltaTime, m_entities);
@@ -171,5 +190,6 @@ void Game::spawnBox(const sf::Vector2f *position)
         // kin->mass = std::numeric_limits<float>::infinity();
         kin->velocity = rnd;
     }
+    box->addComponent<HealthComponent>(10.f);
     m_entities.push_back(std::move(box));
 }

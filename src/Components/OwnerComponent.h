@@ -7,8 +7,9 @@ class OwnerComponent : public Component
 {
 public:
     Entity *owner;
+    sf::Vector2f offset{0.f, 0.f};
 
-    OwnerComponent(Entity *owner)
+    OwnerComponent(Entity *owner, const sf::Vector2f &offset = {0.f, 0.f})
         : owner(owner)
     {}
 

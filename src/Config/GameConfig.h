@@ -15,17 +15,13 @@ enum class KinematicsBehavior : uint32_t
     Rotating = 1 << 4,   // Rotate over time (was Sweeping)
     Extending = 1 << 5,  // Scale over time (lasers)
     Pulsing = 1 << 6,    // Scale up/down repeatedly
-    FaceTarget = 1 << 7  // Always keep facing the target
-};
+    FaceTarget = 1 << 7, // Always keep facing the target
+    Attached = 1 << 8    // stick to targetPoint
 
-// Weapon behavior types
-enum class WeaponBehavior : uint32_t
-{
-    None = 0,
-    FollowOwner = 1 << 0 // Stay at owner position (attached)
 };
 
 // Enable bitwise operations
+
 inline KinematicsBehavior operator|(KinematicsBehavior a, KinematicsBehavior b)
 {
     return static_cast<KinematicsBehavior>(static_cast<uint32_t>(a) | static_cast<uint32_t>(b));
@@ -99,7 +95,6 @@ struct WeaponComponentData
     int piercing;
     int maxHits;    // -1 for unlimited (beams)
     float lifetime; // 0 for infinite
-    WeaponBehavior behavior;
 };
 
 struct KinematicsComponentData

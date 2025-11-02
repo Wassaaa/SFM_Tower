@@ -3,6 +3,9 @@
 #include "CollisionComponent.h"
 #include "TransformComponent.h"
 #include "KinematicsComponent.h"
+#include "WeaponComponent.h"
+#include "HealthComponent.h"
+#include "OwnerComponent.h"
 #include "../MathUtils.h"
 #include <limits>
 #include <cmath>
@@ -42,6 +45,11 @@ void CollisionSystem::update(float deltaTime, std::vector<std::unique_ptr<Entity
                 checkCollision(*collision1, *transform1, *collision2, *transform2);
 
             if (result.intersects) {
+                skipPhysics = false;
+                processCombat(entities[i].get(), entities[j].get());
+                if (skipPhysics) {
+                    continue;
+                }
                 collision1->isColliding = true;
                 collision2->isColliding = true;
 
@@ -204,6 +212,50 @@ sf::FloatRect CollisionSystem::getBounds(const CollisionComponent &col,
             maxY = std::max(maxY, point.y);
         }
         return sf::FloatRect(minX, minY, maxX - minX, maxY - minY);
+    }
+}
+
+void CollisionSystem::processCombat(Entity *entityA, Entity *entityB)
+{
+    // Get components for A attacking B
+    auto *weaponA = entityA->getComponent<WeaponComponent>();
+    auto *healthB = entityB->getComponent<HealthComponent>();
+    auto *ownerA = entityA->getComponent<OwnerComponent>();
+    auto *ownerB = entityB->getComponent<OwnerComponent>();
+
+    // Check for friendly fire
+    if (ownerA && ownerA->owner == entityB) {
+        skipPhysics = true;
+        return;
+    }
+    if (ownerA && ownerB && ownerA->owner == ownerB->owner) {
+        skipPhysics = true;
+        return;
+    }
+
+    // Check for A attacking B
+    if (weaponA && healthB) {
+        skipPhysics = true;
+        healthB->currentHealth -= weaponA->damage;
+        std::cout << "Entity B health: " << healthB->currentHealth << std::endl;
+        // TODO: Handle entity death, piercing and other stats
+    }
+
+    // Get components for B attacking A
+    auto *weaponB = entityB->getComponent<WeaponComponent>();
+    auto *healthA = entityA->getComponent<HealthComponent>();
+
+    // Check for friendly fire (weapon's owner is not A)
+    if (ownerB && ownerB->owner == entityA) {
+        skipPhysics = true;
+        return;
+    }
+    // Check for B attacking A
+    if (weaponB && healthA) {
+        skipPhysics = true;
+        healthA->currentHealth -= weaponB->damage;
+        std::cout << "Entity A health: " << healthA->currentHealth << std::endl;
+        // TODO: Handle entity death, piercing and other stats
     }
 }
 

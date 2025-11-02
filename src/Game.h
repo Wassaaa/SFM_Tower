@@ -12,6 +12,7 @@
 #include "Components/CollisionSystem.h"
 #include "Components/KinematicsSystem.h"
 #include "Components/AnimationSystem.h"
+#include "Components/TargetingSystem.h"
 #include "RenderSystem.h"
 
 class Entity;
@@ -53,4 +54,5 @@ private:
     std::unique_ptr<KinematicsSystem> m_kinematicsSystem;
     std::unique_ptr<RenderSystem> m_renderSystem;
     std::unique_ptr<AnimationSystem> m_animationSystem;
+    std::unique_ptr<TargetingSystem> m_targetingSystem;
 };

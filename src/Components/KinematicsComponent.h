@@ -25,6 +25,10 @@ public:
     float orbitAngle{0.f};
     float currentTime{0.f};
     sf::Vector2f baseScale{1.f, 1.f};
+    sf::Vector2f targetCache{0.f, 0.f};
+
+    sf::Vector2f lastPosition{0.f, 0.f};
+    bool teleported{false};
 
     KinematicsComponent(const KinematicsComponentData &data)
         : velocity(data.velocity)

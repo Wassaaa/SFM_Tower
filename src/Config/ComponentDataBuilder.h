@@ -173,22 +173,13 @@ public:
         m_lifetime = lifetime;
         return *this;
     }
-    WeaponDataBuilder &setBehavior(WeaponBehavior behavior)
-    {
-        m_behavior = behavior;
-        return *this;
-    }
-    WeaponComponentData build() const
-    {
-        return {m_damage, m_piercing, m_maxHits, m_lifetime, m_behavior};
-    }
+    WeaponComponentData build() const { return {m_damage, m_piercing, m_maxHits, m_lifetime}; }
 
 private:
     float m_damage{0.f};
     int m_piercing{0};
     int m_maxHits{1};
     float m_lifetime{0.f};
-    WeaponBehavior m_behavior{WeaponBehavior::None};
 };
 
 class KinematicsDataBuilder

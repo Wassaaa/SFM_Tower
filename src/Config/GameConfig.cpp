@@ -15,7 +15,7 @@ namespace Config {
             .setKinematics(KinematicsDataBuilder()
                                .setVelocity({0.f, 0.f})
                                .setAcceleration({0.f, 0.f})
-                               .setDrag(0.f)
+                               .setDrag(2.f)
                                .setMass(1.f)
                                .setBehavior(KinematicsBehavior::Accelerate)
                                .build())
@@ -83,17 +83,16 @@ namespace Config {
                            .setDamage(10.f)
                            .setPiercing(1)
                            .setMaxHits(1)
-                           .setLifetime(5.f)
-                           .setBehavior(WeaponBehavior::None)
+                           //  .setLifetime(5.f)
                            .build())
-            .setKinematics(KinematicsDataBuilder()
-                               .setAngularVelocity(720.f)
-                               .setOrbitAngularVelocity(90.f)
-                               .setOrbitRadius(100.f)
-                               .setBehavior(KinematicsBehavior::Orbital |
-                                            KinematicsBehavior::Rotating |
-                                            KinematicsBehavior::Pulsing)
-                               .build())
+            .setKinematics(
+                KinematicsDataBuilder()
+                    .setAngularVelocity(720.f)
+                    .setOrbitAngularVelocity(90.f)
+                    .setOrbitRadius(100.f)
+                    .setBehavior(KinematicsBehavior::Rotating | KinematicsBehavior::Pulsing |
+                                 KinematicsBehavior::Orbital | KinematicsBehavior::Attached)
+                    .build())
             .build();
 
     const EntityConfig TOWER =

@@ -104,7 +104,7 @@ void Entity::handleInput(float deltaTime, const InputState &input)
     }
 
     if (auto *anim = getComponent<AnimationComponent>()) {
-        if (kinematics->velocity.x != 0)
+        if (kinematics->velocity.x != 0 || kinematics->velocity.y != 0)
             anim->requestedState = EntityState::MOVE_RIGHT;
         else
             anim->requestedState = EntityState::IDLE;

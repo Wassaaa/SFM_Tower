@@ -28,10 +28,6 @@ public:
 
     virtual void draw(sf::RenderTarget &target, sf::RenderStates states) const override
     {
-        if (isColliding)
-            m_debugShape->setOutlineColor(sf::Color::Red);
-        else
-            m_debugShape->setOutlineColor(sf::Color::White);
         target.draw(*m_debugShape, states);
     }
 

@@ -19,6 +19,9 @@ public:
     void update(float deltaTime, std::vector<std::unique_ptr<Entity>> &entities);
 
 private:
+    // Combat handling
+    void processCombat(Entity *entityA, Entity *entityB);
+    bool skipPhysics{false};
     // Collision resolution logic
     void handleStaticDynamicCollision(Entity *staticEntity, Entity *dynamicEntity,
                                       const sf::Vector2f &normal, float depth);

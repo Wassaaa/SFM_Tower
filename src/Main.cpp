@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
 
     sf::RenderWindow window(sf::VideoMode(Constants::SCREEN_WIDTH, Constants::SCREEN_HEIGHT),
                             "Tower Defense");
-    window.setKeyRepeatEnabled(false);
+    window.setKeyRepeatEnabled(true);
     window.setFramerateLimit(144);
 
     std::unique_ptr<Game> pGame = std::make_unique<Game>();
