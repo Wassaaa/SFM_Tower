@@ -196,7 +196,7 @@ void CollisionSystem::processCombat(Entity *entityA, Entity *entityB)
 
     // Check for A attacking B
     if (weaponA && healthB) {
-        skipPhysics = true;
+        // skipPhysics = true;
         healthB->currentHealth -= weaponA->damage;
         std::cout << "Entity B health: " << healthB->currentHealth << std::endl;
         // TODO: Handle entity death, piercing and other stats
@@ -213,7 +213,7 @@ void CollisionSystem::processCombat(Entity *entityA, Entity *entityB)
     }
     // Check for B attacking A
     if (weaponB && healthA) {
-        skipPhysics = true;
+        // skipPhysics = true;
         healthA->currentHealth -= weaponB->damage;
         std::cout << "Entity A health: " << healthA->currentHealth << std::endl;
         // TODO: Handle entity death, piercing and other stats

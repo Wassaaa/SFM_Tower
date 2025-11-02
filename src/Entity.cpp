@@ -8,7 +8,8 @@
 // OLD INCLUDES (for refactoring)
 #include "Components/AnimationComponent.h"
 #include "Components/DirectionComponent.h"
-#include "Components/VisualComponent.h" // Will be refactored
+#include "Components/VisualComponent.h"
+#include "Components/WeaponComponent.h"
 #include "InputHandler.h"
 #include "MathUtils.h"
 #include <cmath>
@@ -47,6 +48,10 @@ void Entity::initComponents()
     if (auto *visualData = entityData.getComponent<VisualComponent>()) {
         addComponent<VisualComponent>(*visualData);
         addComponent<DirectionComponent>();
+    }
+
+    if (auto *weaponData = entityData.getComponent<WeaponComponent>()) {
+        addComponent<WeaponComponent>(*weaponData);
     }
 
     if (!config.animations.empty()) {

@@ -35,6 +35,8 @@ public:
     void applyCollisionImpulse(const sf::Vector2f &velocityChange);
     virtual void handleInput(float deltaTime, const InputState &input);
 
+    bool markedForDeath = false;
+
 protected:
     virtual void initComponents();
 

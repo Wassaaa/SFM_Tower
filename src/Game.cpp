@@ -37,8 +37,9 @@ bool Game::initialise()
     m_renderSystem = std::make_unique<RenderSystem>();
     m_animationSystem = std::make_unique<AnimationSystem>();
     m_targetingSystem = std::make_unique<TargetingSystem>();
+    m_statusSystem = std::make_unique<StatusSystem>();
 
-    // Create a player controlled box
+    // Create a player
     auto playerEntity =
         std::make_unique<Entity>(this, EntityType::PLAYER, sf::Vector2f(200.f, 200.f));
 
@@ -169,10 +170,29 @@ void Game::update(float deltaTime, sf::RenderWindow &window)
         m_collisionSystem->update(m_physicsTimestep, m_entities);
         m_kinematicsSystem->update(m_physicsTimestep, m_entities);
         m_animationSystem->update(m_physicsTimestep, m_entities);
+        m_statusSystem->update(m_physicsTimestep, m_entities);
 
         m_physicsAccumulator -= m_physicsTimestep;
     }
-    std::cout << "physics ran " << runs << " times" << std::endl;
+    // std::cout << "physics ran " << runs << " times" << std::endl;
+
+    // entity cleanup phase
+    auto it = std::remove_if(
+        m_entities.begin(), m_entities.end(), [&](const std::unique_ptr<Entity> &entity) {
+            if (entity->markedForDeath) {
+                if (entity.get() == m_pPlayerEntity) {
+                    m_pPlayerEntity = nullptr;
+                }
+                if (entity.get() == m_pPlayerWeapon) {
+                    m_pPlayerWeapon = nullptr;
+                }
+                std::cout << "Removed: " << EntityTypeToString(entity->getType()) << std::endl;
+                return true; // mark for removal
+            }
+            return false; // keep
+        });
+    // Erase the removed end of the vector
+    m_entities.erase(it, m_entities.end());
 }
 
 void Game::draw(sf::RenderTarget &target, sf::RenderStates states) const
