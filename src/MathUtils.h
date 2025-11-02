@@ -7,7 +7,7 @@
 static constexpr float PI = 3.14159265358979323846f;
 static constexpr float DEG_TO_RAD = PI / 180.0f;
 static constexpr float RAD_TO_DEG = 180.0f / PI;
-static constexpr float EPSILON = 0.001f;
+static constexpr float EPSILON = 0.0000001f;
 
 // Angle conversion helpers
 inline float ToRadians(float degrees)

@@ -294,11 +294,8 @@ void CollisionSystem::handleCollision(Entity *entityA, Entity *entityB, const sf
         entityB->applyCollisionImpulse(impulse * invMassB);
     }
 
-    // Push objects apart based on their mass.
-    const float percent = 0.5f;
-    const float slop = 0.1f; // How much penetration to allow
-
-    sf::Vector2f correction = std::max(depth - slop, 0.f) / totalInvMass * percent * normal;
+    sf::Vector2f correction =
+        std::max(depth - Constants::SLOP, 0.f) / totalInvMass * Constants::CORRECTION_PER_FRAME * normal;
 
     entityA->resolveCollision(-correction * invMassA);
     entityB->resolveCollision(correction * invMassB);
