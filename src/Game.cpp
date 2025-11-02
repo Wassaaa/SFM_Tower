@@ -111,10 +111,35 @@ void Game::update(float deltaTime, sf::RenderWindow &window)
     // Cap deltaTime
     deltaTime = std::min(deltaTime, 0.1f);
 
-    switch (m_state) {
-    case GameState::ACTIVE: {
-        InputState &input = m_inputHandler.getState();
+    m_physicsAccumulator += deltaTime;
 
+    InputState &input = m_inputHandler.getState();
+    sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
+    sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
+    input.mouseWorldPosition = worldPos;
+
+    int runs = 0;
+    while (m_physicsAccumulator >= m_physicsTimestep) {
+        runs++;
+
+        // Reset states
+        for (const auto &entity : m_entities) {
+            if (auto *kin = entity->getComponent<KinematicsComponent>()) {
+                kin->isGrounded = false;
+            }
+        }
+
+        // Handle player input
+        if (m_pPlayerEntity) {
+            m_pPlayerEntity->handleInput(m_physicsTimestep, input);
+        }
+        if (m_pPlayerWeapon) {
+            if (auto *kin = m_pPlayerWeapon->getComponent<KinematicsComponent>()) {
+                kin->aimPoint = &input.mouseWorldPosition;
+            }
+        }
+
+        // Handle game events
         if (input.spawnBox) {
             spawnBox();
             input.spawnBox = false;
@@ -123,13 +148,9 @@ void Game::update(float deltaTime, sf::RenderWindow &window)
             sf::Vector2f playerPos = m_pPlayerEntity->getPosition();
             sf::Vector2f mousePos = input.mouseWorldPosition;
 
-            // Calculate direction vector
-            sf::Vector2f dir = mousePos - playerPos;
-            dir = VecNormalized(dir);
-
+            sf::Vector2f dir = VecNormalized(mousePos - playerPos);
             const float bulletSpeed = 3000.f;
 
-            // Create a bullet entity
             auto bullet = std::make_unique<Entity>(this, EntityType::BULLET, playerPos);
             if (auto *kin = bullet->getComponent<KinematicsComponent>()) {
                 kin->velocity = dir * bulletSpeed;
@@ -139,38 +160,19 @@ void Game::update(float deltaTime, sf::RenderWindow &window)
             }
             bullet->addComponent<OwnerComponent>(m_pPlayerEntity);
             m_entities.push_back(std::move(bullet));
+
             input.action1 = false;
         }
 
-        sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
-        sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
-        input.mouseWorldPosition = worldPos;
-
-        if (m_pPlayerEntity) {
-            m_pPlayerEntity->handleInput(deltaTime, input);
-        }
-        if (m_pPlayerWeapon) {
-            if (auto *kin = m_pPlayerWeapon->getComponent<KinematicsComponent>()) {
-                kin->aimPoint = &input.mouseWorldPosition;
-            }
-        }
-
-        for (const auto &entity : m_entities) {
-            if (auto *kin = entity->getComponent<KinematicsComponent>()) {
-                kin->isGrounded = false;
-            }
-        }
-
-        // Run logic systems
+        // Run all game systems *using the fixed timestep*
         m_targetingSystem->update(m_entities);
-        m_collisionSystem->update(deltaTime, m_entities);
-        m_kinematicsSystem->update(deltaTime, m_entities);
-        m_animationSystem->update(deltaTime, m_entities);
-    } break;
+        m_collisionSystem->update(m_physicsTimestep, m_entities);
+        m_kinematicsSystem->update(m_physicsTimestep, m_entities);
+        m_animationSystem->update(m_physicsTimestep, m_entities);
 
-    case GameState::WAITING:
-        break;
+        m_physicsAccumulator -= m_physicsTimestep;
     }
+    std::cout << "physics ran " << runs << " times" << std::endl;
 }
 
 void Game::draw(sf::RenderTarget &target, sf::RenderStates states) const

@@ -46,6 +46,10 @@ private:
     GameState m_state;
     std::unique_ptr<sf::Clock> m_pClock;
 
+    // Physics
+    const float m_physicsTimestep = 1.f / 60.f;
+    float m_physicsAccumulator = 0.f;
+
     sf::Font m_font;
 
     InputHandler m_inputHandler;
