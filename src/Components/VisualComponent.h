@@ -1,7 +1,7 @@
 #pragma once
 #include "Component.h"
 #include "../ResourceManager.h"
-#include "../Config/GameConfig.h"
+#include "../Config/VisualDataBuilder.h"
 #include <iostream>
 
 class VisualComponent : public Component, public sf::Drawable

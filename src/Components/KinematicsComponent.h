@@ -1,7 +1,8 @@
 #pragma once
 #include <SFML/System/Vector2.hpp>
 #include "Component.h"
-#include "../Config/GameConfig.h"
+#include "../Types.h"
+#include "../Config/KinematicsDataBuilder.h"
 
 class KinematicsComponent : public Component
 {

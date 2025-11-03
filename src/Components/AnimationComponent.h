@@ -2,7 +2,7 @@
 #include <SFML/Graphics.hpp>
 #include <unordered_map>
 #include "../Types.h"
-#include "../Config/GameConfig.h"
+#include "../Config/AnimationInfoBuilder.h"
 #include "Component.h"
 
 struct AnimData

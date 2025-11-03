@@ -1,7 +1,7 @@
 #include "GameConfig.h"
-#include "ComponentDataBuilder.h"
 #include "EntityConfigBuilder.h"
 #include "../Constants.h"
+#include "../Types.h"
 #include <math.h>
 
 namespace Config {

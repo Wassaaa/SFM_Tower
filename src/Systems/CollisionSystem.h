@@ -1,13 +1,21 @@
 #pragma once
 
 #include <SFML/System/Vector2.hpp>
+#include <SFML/Graphics/Rect.hpp>
+#include <SFML/Graphics/Transform.hpp>
 #include <memory>
 #include <vector>
-#include "../Config/GameConfig.h"
 
 class Entity;
 class CollisionComponent;
 class TransformComponent;
+
+struct CollisionResult
+{
+    bool intersects;
+    sf::Vector2f normal;
+    float depth;
+};
 
 class CollisionSystem
 {

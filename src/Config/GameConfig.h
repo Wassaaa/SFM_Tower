@@ -2,107 +2,12 @@
 #include <SFML/Graphics.hpp>
 #include <unordered_map>
 #include <optional>
+#include "VisualDataBuilder.h"
+#include "CollisionDataBuilder.h"
+#include "AnimationInfoBuilder.h"
+#include "WeaponDataBuilder.h"
+#include "KinematicsDataBuilder.h"
 #include "../Types.h"
-
-// Kinematics behavior types (can be combined with bitwise OR)
-enum class KinematicsBehavior : uint32_t
-{
-    None = 0,
-    Linear = 1 << 0,     // Move with velocity
-    Accelerate = 1 << 1, // Velocity changes over time
-    Homing = 1 << 2,     // Track target position
-    Orbital = 1 << 3,    // Circle around point
-    Rotating = 1 << 4,   // Rotate over time (was Sweeping)
-    Extending = 1 << 5,  // Scale over time (lasers)
-    Pulsing = 1 << 6,    // Scale up/down repeatedly
-    FaceTarget = 1 << 7, // Always keep facing the target
-    Attached = 1 << 8    // stick to targetPoint
-
-};
-
-// Enable bitwise operations
-
-inline KinematicsBehavior operator|(KinematicsBehavior a, KinematicsBehavior b)
-{
-    return static_cast<KinematicsBehavior>(static_cast<uint32_t>(a) | static_cast<uint32_t>(b));
-}
-
-inline KinematicsBehavior operator&(KinematicsBehavior a, KinematicsBehavior b)
-{
-    return static_cast<KinematicsBehavior>(static_cast<uint32_t>(a) & static_cast<uint32_t>(b));
-}
-
-inline bool hasFlag(KinematicsBehavior value, KinematicsBehavior flag)
-{
-    return (static_cast<uint32_t>(value) & static_cast<uint32_t>(flag)) != 0;
-}
-
-// Collision response data
-struct CollisionResult
-{
-    bool intersects;
-    sf::Vector2f normal;
-    float depth;
-};
-
-// Data structures for component configurations
-struct VisualComponentData
-{
-    std::string filename;
-    sf::Vector2f scale;
-    sf::Vector2f origin;
-    sf::Vector2f offset;
-    float rotation;
-};
-
-struct CollisionComponentData
-{
-    std::vector<sf::Vector2f> points;
-
-    // Transform data
-    sf::Vector2f scale;
-    sf::Vector2f origin;
-    sf::Vector2f offset;
-    float rotation;
-    sf::Color debugColor;
-};
-
-struct AnimationInfo
-{
-    sf::Vector2i frameSize;
-    sf::Vector2i startPos;
-    size_t frameCount;
-    sf::Time frameDuration;
-    bool loop;
-    bool velocityScaled = false;
-};
-
-struct WeaponComponentData
-{
-    float damage;
-    int piercing;
-    int maxHits;    // -1 for unlimited (beams)
-    float lifetime; // 0 for infinite
-};
-
-struct KinematicsComponentData
-{
-    sf::Vector2f velocity;
-    sf::Vector2f acceleration;
-    float angularVelocity;
-    float angularAcceleration;
-    sf::Vector2f scaleVelocity;
-    KinematicsBehavior behavior;
-    float orbitRadius;
-    float orbitAngularVelocity;
-    float pulseFrequency;
-    float pulseAmplitude;
-    float drag; // Linear damping (0 = no drag, 1 = instant stop)
-    float mass; // For physics response (1.0 = default)
-    sf::Vector2f gravity;
-    float restitution;
-    bool isStatic;
-};
 
 struct EntityConfig
 {

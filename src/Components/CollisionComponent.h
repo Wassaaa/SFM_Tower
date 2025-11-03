@@ -1,7 +1,7 @@
 #pragma once
 #include "Component.h"
 #include "../Constants.h"
-#include "../Config/GameConfig.h"
+#include "../Config/CollisionDataBuilder.h"
 #include <SFML/System/Vector2.hpp>
 #include <SFML/Graphics/Color.hpp>
 #include <vector>

@@ -5,6 +5,7 @@
 #include "../Components/DirectionComponent.h"
 #include "../Components/OwnerComponent.h"
 #include "../MathUtils.h"
+#include "../Types.h"
 
 void KinematicsSystem::update(float dt, std::vector<std::unique_ptr<Entity>> &entities)
 {
@@ -39,8 +40,7 @@ void KinematicsSystem::update(float dt, std::vector<std::unique_ptr<Entity>> &en
     }
 }
 
-void KinematicsSystem::handleVelocity(float dt, KinematicsComponent *kin,
-                                      TransformComponent *trans)
+void KinematicsSystem::handleVelocity(float dt, KinematicsComponent *kin, TransformComponent *trans)
 {
     // Gravity
     if (kin->mass != 0.f && !std::isinf(kin->mass)) {
@@ -80,8 +80,8 @@ void KinematicsSystem::handleVelocity(float dt, KinematicsComponent *kin,
     }
 }
 
-void KinematicsSystem::handlePosition(float dt, KinematicsComponent *kin,
-                                      TransformComponent *trans, Entity *entity)
+void KinematicsSystem::handlePosition(float dt, KinematicsComponent *kin, TransformComponent *trans,
+                                      Entity *entity)
 {
     // Priority 1: Attached (Overrides all other movement)
     if (hasFlag(kin->behavior, KinematicsBehavior::Attached)) {
@@ -104,15 +104,14 @@ void KinematicsSystem::handlePosition(float dt, KinematicsComponent *kin,
     }
     // Priority 3: Standard velocity movement
     if (!kin->teleported && (hasFlag(kin->behavior, KinematicsBehavior::Linear) ||
-                                    hasFlag(kin->behavior, KinematicsBehavior::Accelerate) ||
-                                    hasFlag(kin->behavior, KinematicsBehavior::Homing))) {
+                             hasFlag(kin->behavior, KinematicsBehavior::Accelerate) ||
+                             hasFlag(kin->behavior, KinematicsBehavior::Homing))) {
         trans->position += kin->velocity * dt;
     }
 }
 
-void KinematicsSystem::handleFacingDirection(KinematicsComponent *kin,
-                                             TransformComponent *trans, DirectionComponent *dir,
-                                             Entity *entity)
+void KinematicsSystem::handleFacingDirection(KinematicsComponent *kin, TransformComponent *trans,
+                                             DirectionComponent *dir, Entity *entity)
 {
     if (!dir) {
         return;
@@ -147,8 +146,8 @@ void KinematicsSystem::handleFacingDirection(KinematicsComponent *kin,
     trans->scale.y = kin->baseScale.y;
 }
 
-void KinematicsSystem::handleRotation(float dt, KinematicsComponent *kin,
-                                      TransformComponent *trans, Entity *entity)
+void KinematicsSystem::handleRotation(float dt, KinematicsComponent *kin, TransformComponent *trans,
+                                      Entity *entity)
 {
     // Priority 1: Face Target (Overrides other rotation)
     if (hasFlag(kin->behavior, KinematicsBehavior::FaceTarget) && kin->aimPoint) {
@@ -199,13 +198,11 @@ void KinematicsSystem::handleRotation(float dt, KinematicsComponent *kin,
     }
 }
 
-void KinematicsSystem::handleScaling(float dt, KinematicsComponent *kin,
-                                     TransformComponent *trans)
+void KinematicsSystem::handleScaling(float dt, KinematicsComponent *kin, TransformComponent *trans)
 {
     if (hasFlag(kin->behavior, KinematicsBehavior::Pulsing)) {
         float pulseMultiplier =
-            1.f + kin->pulseAmplitude *
-                      std::sin(kin->currentTime * kin->pulseFrequency);
+            1.f + kin->pulseAmplitude * std::sin(kin->currentTime * kin->pulseFrequency);
         trans->scale *= pulseMultiplier;
     }
 }
