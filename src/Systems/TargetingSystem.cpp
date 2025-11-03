@@ -1,8 +1,8 @@
 #include "TargetingSystem.h"
 #include "../Entity.h"
-#include "OwnerComponent.h"
-#include "TransformComponent.h"
-#include "KinematicsComponent.h"
+#include "../Components/OwnerComponent.h"
+#include "../Components/TransformComponent.h"
+#include "../Components/KinematicsComponent.h"
 
 void TargetingSystem::update(std::vector<std::unique_ptr<Entity>> &entities)
 {

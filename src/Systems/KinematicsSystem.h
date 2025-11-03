@@ -18,10 +18,10 @@ public:
     void update(float dt, std::vector<std::unique_ptr<Entity>> &entities);
 
 private:
-    void handleVelocity(float dt, KinematicsComponent *kin);
+    void handleVelocity(float dt, KinematicsComponent *kin, TransformComponent *trans);
     void handlePosition(float dt, KinematicsComponent *kin, TransformComponent *trans,
                         Entity *entity);
-    void handleFacingDirection(KinematicsComponent *kinematics, TransformComponent *transform,
+    void handleFacingDirection(KinematicsComponent *kin, TransformComponent *trans,
                                DirectionComponent *dir, Entity *entity);
     void handleRotation(float dt, KinematicsComponent *kin, TransformComponent *trans,
                         Entity *entity);

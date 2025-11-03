@@ -1,10 +1,10 @@
 #include "StatusSystem.h"
 #include "../Entity.h"
 #include "../Constants.h"
-#include "WeaponComponent.h"
-#include "HealthComponent.h"
-#include "TransformComponent.h"
-#include "KinematicsComponent.h"
+#include "../Components/WeaponComponent.h"
+#include "../Components/HealthComponent.h"
+#include "../Components/TransformComponent.h"
+#include "../Components/KinematicsComponent.h"
 
 void StatusSystem::update(float dt, std::vector<std::unique_ptr<Entity>> &entities)
 {

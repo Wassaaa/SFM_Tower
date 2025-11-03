@@ -1,7 +1,7 @@
 #include "AnimationSystem.h"
 #include "../Entity.h"
-#include "AnimationComponent.h"
-#include "VisualComponent.h"
+#include "../Components/AnimationComponent.h"
+#include "../Components/VisualComponent.h"
 
 void AnimationSystem::update(float dt, std::vector<std::unique_ptr<Entity>> &entities)
 {

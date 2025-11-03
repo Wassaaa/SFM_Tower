@@ -9,12 +9,12 @@
 #include "Constants.h"
 #include "Types.h"
 #include "InputHandler.h"
-#include "Components/CollisionSystem.h"
-#include "Components/KinematicsSystem.h"
-#include "Components/AnimationSystem.h"
-#include "Components/TargetingSystem.h"
-#include "Components/StatusSystem.h"
-#include "RenderSystem.h"
+#include "Systems/CollisionSystem.h"
+#include "Systems/KinematicsSystem.h"
+#include "Systems/AnimationSystem.h"
+#include "Systems/TargetingSystem.h"
+#include "Systems/StatusSystem.h"
+#include "Systems/RenderSystem.h"
 
 class Entity;
 class Game;

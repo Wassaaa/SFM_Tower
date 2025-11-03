@@ -1,11 +1,11 @@
 #include "CollisionSystem.h"
 #include "../Entity.h"
-#include "CollisionComponent.h"
-#include "TransformComponent.h"
-#include "KinematicsComponent.h"
-#include "WeaponComponent.h"
-#include "HealthComponent.h"
-#include "OwnerComponent.h"
+#include "../Components/CollisionComponent.h"
+#include "../Components/TransformComponent.h"
+#include "../Components/KinematicsComponent.h"
+#include "../Components/WeaponComponent.h"
+#include "../Components/HealthComponent.h"
+#include "../Components/OwnerComponent.h"
 #include "../MathUtils.h"
 #include <limits>
 #include <cmath>

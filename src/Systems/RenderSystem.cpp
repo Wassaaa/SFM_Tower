@@ -1,10 +1,10 @@
 #include "RenderSystem.h"
-#include "Entity.h"
-#include "Components/VisualComponent.h"
-#include "Components/TransformComponent.h"
-#include "Components/CollisionComponent.h"
-#include "Components/DirectionComponent.h"
-#include "Constants.h"
+#include "../Entity.h"
+#include "../Components/VisualComponent.h"
+#include "../Components/TransformComponent.h"
+#include "../Components/CollisionComponent.h"
+#include "../Components/DirectionComponent.h"
+#include "../Constants.h"
 
 void RenderSystem::draw(sf::RenderTarget &target, sf::RenderStates states,
                         const std::vector<std::unique_ptr<Entity>> &entities)
