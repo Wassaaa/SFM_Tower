@@ -51,6 +51,7 @@ namespace Config {
                                                        .setFrameCount(8)
                                                        .setFrameDuration(sf::milliseconds(100))
                                                        .setLoop(true)
+                                                       .withVelocityScaled(true)
                                                        .build())
 
             .addAnimation(EntityState::WEAPON_1, AnimationInfoBuilder()

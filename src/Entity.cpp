@@ -1,11 +1,9 @@
 #include "Entity.h"
 #include "Game.h"
-#include "Config/EntityManager.h"
-// NEW INCLUDES
+#include "Config/GameConfig.h"
 #include "Components/TransformComponent.h"
 #include "Components/KinematicsComponent.h"
 #include "Components/CollisionComponent.h"
-// OLD INCLUDES (for refactoring)
 #include "Components/AnimationComponent.h"
 #include "Components/DirectionComponent.h"
 #include "Components/VisualComponent.h"
@@ -25,7 +23,6 @@ Entity::Entity(Game *pGame, EntityType type, const sf::Vector2f &position)
 
 void Entity::initComponents()
 {
-    const EntityData &entityData = EntityManager::getInstance().getEntityData(m_type);
     const EntityConfig &config = Config::ENTITY_CONFIGS.at(m_type);
 
     sf::Vector2f baseScale{1, 1};
@@ -37,22 +34,22 @@ void Entity::initComponents()
 
     auto &transform = addComponent<TransformComponent>(m_initialPosition, rotation, baseScale);
 
-    if (auto *kinematicsData = entityData.getComponent<KinematicsComponent>()) {
-        auto &kinematics = addComponent<KinematicsComponent>(*kinematicsData);
+    if (config.kinematics.has_value()) {
+        auto &kinematics = addComponent<KinematicsComponent>(config.kinematics.value());
         kinematics.baseScale = transform.scale;
     }
 
-    if (auto *collisionData = entityData.getComponent<CollisionComponent>()) {
-        addComponent<CollisionComponent>(*collisionData);
+    if (config.collision.has_value()) {
+        addComponent<CollisionComponent>(config.collision.value());
     }
 
-    if (auto *visualData = entityData.getComponent<VisualComponent>()) {
-        addComponent<VisualComponent>(*visualData);
+    if (config.visual.has_value()) {
+        addComponent<VisualComponent>(config.visual.value());
         addComponent<DirectionComponent>();
     }
 
-    if (auto *weaponData = entityData.getComponent<WeaponComponent>()) {
-        addComponent<WeaponComponent>(*weaponData);
+    if (config.weapon.has_value()) {
+        addComponent<WeaponComponent>(config.weapon.value());
     }
 
     if (!config.animations.empty()) {

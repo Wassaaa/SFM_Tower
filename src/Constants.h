@@ -15,6 +15,7 @@ namespace Constants {
 
     // Animation
     constexpr float ANIM_VELOCITY_THRESHOLD = 10.f;
+    constexpr float ANIM_VELOCITY_MAX = 400.f;
 
     // Vampire
     constexpr float VAMPIRE_HEIGHT = 32.f;

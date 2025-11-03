@@ -4,6 +4,7 @@
 #include "../Components/VisualComponent.h"
 #include "../Components/KinematicsComponent.h"
 #include "../MathUtils.h"
+#include "../Constants.h"
 
 void AnimationSystem::update(float dt, std::vector<std::unique_ptr<Entity>> &entities)
 {
@@ -18,9 +19,9 @@ void AnimationSystem::update(float dt, std::vector<std::unique_ptr<Entity>> &ent
         // Calculate velocity-based animation speed
         if (auto *kin = entity->getComponent<KinematicsComponent>()) {
             float speed = VecLength(kin->velocity);
-            // Scale animation speed: 0 at rest, 1.0 at max speed (400)
-            // Clamp minimum to 0.3 so animations don't freeze at low speeds
-            anim->velocityScale = std::max(0.3f, std::min(1.0f, speed / 400.f));
+            // Scale animation speed: 0.3 at rest, 1.0 at max speed (400)
+            anim->velocityScale =
+                std::max(0.3f, std::min(1.0f, speed / Constants::ANIM_VELOCITY_MAX));
         }
 
         handleStateTransition(anim);

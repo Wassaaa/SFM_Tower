@@ -133,9 +133,14 @@ public:
         m_loop = loop;
         return *this;
     }
+    AnimationInfoBuilder &withVelocityScaled(bool scaled)
+    {
+        m_velocityScaled = scaled;
+        return *this;
+    }
     AnimationInfo build() const
     {
-        return {m_frameSize, m_startPos, m_frameCount, m_frameDuration, m_loop};
+        return {m_frameSize, m_startPos, m_frameCount, m_frameDuration, m_loop, m_velocityScaled};
     }
 
 private:
@@ -144,6 +149,7 @@ private:
     size_t m_frameCount{1};
     sf::Time m_frameDuration{sf::milliseconds(100)};
     bool m_loop{true};
+    bool m_velocityScaled{false};
 };
 
 class WeaponDataBuilder
