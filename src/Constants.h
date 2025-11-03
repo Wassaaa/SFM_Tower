@@ -13,6 +13,9 @@ namespace Constants {
     constexpr float PLAYER_ACCELERATION = 100.f;
     constexpr float PLAYER_DRAG = 0.72f;
 
+    // Animation
+    constexpr float ANIM_VELOCITY_THRESHOLD = 10.f;
+
     // Vampire
     constexpr float VAMPIRE_HEIGHT = 32.f;
     constexpr float VAMPIRE_WIDTH = 32.f;
@@ -21,6 +24,6 @@ namespace Constants {
     // Wall
     constexpr float WALL_THICKNESS = 500.f;
 
-    constexpr float SLOP = 0.2f;
+    // Physics - positional correction applies gradually over frames
     constexpr float CORRECTION_PER_FRAME = 0.9f; // percent
 } // namespace Constants

@@ -12,6 +12,7 @@
 #include "Components/WeaponComponent.h"
 #include "InputHandler.h"
 #include "MathUtils.h"
+#include "Constants.h"
 #include <cmath>
 
 Entity::Entity(Game *pGame, EntityType type, const sf::Vector2f &position)
@@ -113,7 +114,8 @@ void Entity::handleInput(float deltaTime, const InputState &input)
     }
 
     if (auto *anim = getComponent<AnimationComponent>()) {
-        if (kinematics->velocity.x != 0 || kinematics->velocity.y != 0)
+        float horizontalSpeed = std::abs(kinematics->velocity.x);
+        if (horizontalSpeed > Constants::ANIM_VELOCITY_THRESHOLD)
             anim->requestedState = EntityState::MOVE_RIGHT;
         else
             anim->requestedState = EntityState::IDLE;

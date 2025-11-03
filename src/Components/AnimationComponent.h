@@ -10,6 +10,7 @@ struct AnimData
     std::vector<sf::IntRect> frames;
     sf::Time frameDuration = sf::Time::Zero;
     bool loop = true;
+    bool velocityScaled = false;
 };
 
 class AnimationComponent : public Component
@@ -30,6 +31,7 @@ public:
     size_t currentFrame{0};
     sf::Time currentTime{sf::Time::Zero};
     bool isPlaying{false};
+    float velocityScale{1.0f}; // Speed multiplier for animation based on entity velocity
 
     virtual const char *getName() const override { return "AnimationComponent"; }
 };

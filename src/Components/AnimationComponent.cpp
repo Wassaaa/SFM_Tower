@@ -6,6 +6,7 @@ void AnimationComponent::addAnimation(EntityState state, const AnimationInfo &an
     if (inserted) {
         it->second.frameDuration = animInfo.frameDuration;
         it->second.loop = animInfo.loop;
+        it->second.velocityScaled = animInfo.velocityScaled;
 
         for (size_t i = 0; i < animInfo.frameCount; i++) {
             sf::IntRect frame(animInfo.startPos.x + i * animInfo.frameSize.x,

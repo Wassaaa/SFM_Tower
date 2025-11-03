@@ -50,8 +50,11 @@ void CollisionSystem::update(float deltaTime, std::vector<std::unique_ptr<Entity
                 if (skipPhysics) {
                     continue;
                 }
-                collision1->isColliding = true;
-                collision2->isColliding = true;
+                // Only set visual collision state for significant penetrations
+                if (result.depth > 1.0f) {
+                    collision1->isColliding = true;
+                    collision2->isColliding = true;
+                }
 
                 handleCollision(entities[i].get(), entities[j].get(), result.normal, result.depth);
             }
@@ -290,8 +293,8 @@ void CollisionSystem::handleCollision(Entity *entityA, Entity *entityB, const sf
         kinB->isGrounded = true;
     }
 
-    sf::Vector2f correction = std::max(depth - Constants::SLOP, 0.f) / totalInvMass *
-                              Constants::CORRECTION_PER_FRAME * normal;
+    // Apply positional correction to separate overlapping objects
+    sf::Vector2f correction = depth / totalInvMass * Constants::CORRECTION_PER_FRAME * normal;
 
     entityA->resolveCollision(-correction * invMassA);
     entityB->resolveCollision(correction * invMassB);

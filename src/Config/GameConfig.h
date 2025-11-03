@@ -74,6 +74,7 @@ struct AnimationInfo
     size_t frameCount;
     sf::Time frameDuration;
     bool loop;
+    bool velocityScaled = false;
 };
 
 struct WeaponComponentData

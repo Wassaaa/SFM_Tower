@@ -2,6 +2,8 @@
 #include "../Entity.h"
 #include "../Components/AnimationComponent.h"
 #include "../Components/VisualComponent.h"
+#include "../Components/KinematicsComponent.h"
+#include "../MathUtils.h"
 
 void AnimationSystem::update(float dt, std::vector<std::unique_ptr<Entity>> &entities)
 {
@@ -12,6 +14,15 @@ void AnimationSystem::update(float dt, std::vector<std::unique_ptr<Entity>> &ent
         if (!anim || !visual || !anim->isEnabled()) {
             continue;
         }
+
+        // Calculate velocity-based animation speed
+        if (auto *kin = entity->getComponent<KinematicsComponent>()) {
+            float speed = VecLength(kin->velocity);
+            // Scale animation speed: 0 at rest, 1.0 at max speed (400)
+            // Clamp minimum to 0.3 so animations don't freeze at low speeds
+            anim->velocityScale = std::max(0.3f, std::min(1.0f, speed / 400.f));
+        }
+
         handleStateTransition(anim);
         updateFrame(dt, anim);
         applyToVisual(anim, visual);
@@ -67,7 +78,9 @@ void AnimationSystem::updateFrame(float dt, AnimationComponent *anim) const
     }
 
     // Play the animation / update frames
-    anim->currentTime += sf::seconds(dt);
+    // Apply velocity scaling only if animation supports it
+    float timeScale = (data.velocityScaled) ? anim->velocityScale : 1.0f;
+    anim->currentTime += sf::seconds(dt * timeScale);
     if (anim->currentTime >= data.frameDuration) {
         anim->currentTime -= data.frameDuration;
         anim->currentFrame++;
